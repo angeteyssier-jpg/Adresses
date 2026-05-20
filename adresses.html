@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestion d'Adresses - Correction Modif</title>
+    <title>Gestion d'Adresses - Favoris</title>
     <style>
         :root {
             --primary: #007AFF;
             --danger: #FF3B30;
             --success: #34C759;
+            --warning: #FF9500; /* Couleur pour les favoris */
             --bg: #F2F2F7;
             --card-bg: #FFFFFF;
             --text: #000000;
@@ -52,7 +53,31 @@
             margin-bottom: 10px;
         }
 
+        .header-title-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         h1 { font-size: 20px; margin: 0; }
+
+        .sort-btn {
+            font-size: 12px;
+            background: none;
+            border: 1px solid var(--text-sec);
+            color: var(--text-sec);
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .sort-btn.active {
+            border-color: var(--warning);
+            color: var(--warning);
+            background-color: rgba(255, 149, 0, 0.1);
+        }
 
         .backup-btn {
             font-size: 12px;
@@ -91,8 +116,23 @@
             border-radius: 12px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             cursor: pointer;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
         }
         .address-item:active { transform: scale(0.98); }
+        
+        .fav-icon {
+            color: var(--warning);
+            font-size: 18px;
+            line-height: 1.2;
+            margin-top: 2px;
+            flex-shrink: 0;
+            visibility: hidden; /* Caché par défaut si pas favori */
+        }
+        .fav-icon.visible { visibility: visible; }
+
+        .item-content { flex: 1; min-width: 0; }
         .address-title { font-weight: 600; font-size: 17px; margin-bottom: 4px; }
         .address-preview { color: var(--text-sec); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -124,7 +164,7 @@
             height: 100%;
             background-color: var(--bg);
             z-index: 20;
-            display: none; /* Caché par défaut */
+            display: none;
             flex-direction: column;
             overflow-y: auto;
         }
@@ -138,6 +178,7 @@
             border-bottom: 1px solid #C6C6C8;
             position: sticky;
             top: 0;
+            flex-shrink: 0;
         }
 
         .back-btn, .action-header-btn {
@@ -150,27 +191,56 @@
         .back-btn { color: var(--primary); }
         .action-header-btn { color: var(--primary); font-weight: 600; }
 
-        .view-content { padding: 20px; flex: 1; }
+        .view-content { 
+            padding: 20px; 
+            flex: 1; 
+            display: flex;
+            flex-direction: column;
+        }
 
         /* Détail */
-        .detail-title { font-size: 24px; font-weight: 700; margin-bottom: 20px; }
-        .section-label { font-size: 13px; color: var(--text-sec); text-transform: uppercase; margin-bottom: 5px; font-weight: 600; margin-top: 15px; }
+        .detail-title { font-size: 24px; font-weight: 700; margin-bottom: 20px; flex-shrink: 0; }
+        
+        .section-label { 
+            font-size: 13px; 
+            color: var(--text-sec); 
+            text-transform: uppercase; 
+            margin-bottom: 5px; 
+            margin-top: 15px;
+            font-weight: 600; 
+            flex-shrink: 0;
+        }
+
         .detail-box {
             background-color: var(--card-bg);
             padding: 15px;
             border-radius: 10px;
             font-size: 16px;
-            line-height: 1.5;
+            line-height: 1.6;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             white-space: pre-wrap;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 120px; 
+            max-height: 40vh;
+            overflow-y: auto;
         }
-        .actions-container { display: flex; gap: 15px; margin-top: 30px; padding-bottom: 40px; }
+
+        .bottom-actions-wrapper {
+            margin-top: auto;
+            padding-top: 30px;
+            padding-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .actions-container { display: flex; gap: 15px; margin-bottom: 15px; }
+
         .action-btn {
             flex: 1;
-            padding: 15px;
+            padding: 16px;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
+            border-radius: 14px;
+            font-size: 17px;
             font-weight: 600;
             color: white;
             cursor: pointer;
@@ -179,15 +249,50 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
         .btn-waze { background-color: var(--waze); }
         .btn-maps { background-color: var(--maps); }
-        .btn-edit-global { background-color: var(--primary); margin-top: 15px; width: 100%; }
+
+        .btn-delete-small {
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-size: 14px;
+            text-decoration: underline;
+            cursor: pointer;
+            padding: 10px;
+            margin: 0 auto;
+            display: block;
+            opacity: 0.8;
+        }
 
         /* Formulaire */
         .form-group { margin-bottom: 20px; }
         .form-label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-sec); font-size: 14px; }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid #C6C6C8;
+        }
+        .checkbox-group input {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--warning);
+        }
+        .checkbox-group label {
+            font-size: 17px;
+            font-weight: 500;
+            color: var(--text);
+            margin: 0;
+            cursor: pointer;
+        }
+
         .form-input, .form-textarea {
             width: 100%;
             padding: 12px;
@@ -225,10 +330,15 @@
     <div id="list-view">
         <header>
             <div class="header-top">
-                <h1>Mes Adresses</h1>
+                <div class="header-title-group">
+                    <h1>Mes Adresses</h1>
+                    <button class="sort-btn" id="sort-btn" onclick="toggleSort()">
+                        <span id="sort-icon">☆</span> <span id="sort-text">Trier Favoris</span>
+                    </button>
+                </div>
                 <div>
-                    <button class="backup-btn" onclick="exportData()">💾 Sauvegarder</button>
-                    <button class="backup-btn restore" onclick="triggerImport()">📂 Restaurer</button>
+                    <button class="backup-btn" onclick="exportData()">💾</button>
+                    <button class="backup-btn restore" onclick="triggerImport()">📂</button>
                 </div>
             </div>
             <input type="text" id="search-bar" placeholder="Rechercher...">
@@ -241,8 +351,9 @@
     <div id="detail-view" class="full-screen-view">
         <div class="view-header">
             <button class="back-btn" onclick="closeView('detail-view')">← Retour</button>
-            <button class="action-header-btn" id="btn-modify-header" onclick="startEditProcess()">Modifier</button>
+            <button class="action-header-btn" onclick="startEditProcess()">Modifier</button>
         </div>
+        
         <div class="view-content">
             <div class="detail-title" id="d-title">Titre</div>
             
@@ -253,14 +364,15 @@
             <div class="detail-box" id="d-specific"></div>
 
             <div class="section-label">Adresse GPS</div>
-            <div class="detail-box" id="d-query" style="color: var(--primary);"></div>
+            <div class="detail-box" id="d-query" style="color: var(--primary); font-weight:500;"></div>
 
-            <div class="actions-container">
-                <a href="#" target="_blank" class="action-btn btn-waze" id="btn-waze">Waze</a>
-                <a href="#" target="_blank" class="action-btn btn-maps" id="btn-maps">Maps</a>
+            <div class="bottom-actions-wrapper">
+                <div class="actions-container">
+                    <a href="#" target="_blank" class="action-btn btn-waze" id="btn-waze">Waze</a>
+                    <a href="#" target="_blank" class="action-btn btn-maps" id="btn-maps">Maps</a>
+                </div>
+                <button class="btn-delete-small" onclick="deleteCurrentAddress()">Supprimer cette adresse</button>
             </div>
-            
-            <button class="action-btn btn-edit-global" style="background-color: var(--danger); margin-top:20px;" onclick="deleteCurrentAddress()">Supprimer</button>
         </div>
     </div>
 
@@ -284,6 +396,14 @@
                 <input type="text" id="f-query" class="form-input" placeholder="Ex: 10 Rue de la Paix">
             </div>
 
+            <!-- Case à cocher Favoris -->
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="f-fav">
+                    <label for="f-fav">Ajouter aux Favoris ★</label>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label class="form-label">Zone Libre</label>
                 <textarea id="f-free" class="form-textarea" placeholder="Notes..."></textarea>
@@ -302,20 +422,19 @@
 
     <script>
         let addresses = [];
-        let currentId = null; // ID de l'adresse actuellement visualisée
+        let currentId = null;
+        let isSortedByFav = false; // État du tri
 
         function init() {
             const stored = localStorage.getItem('myAddresses');
             if (stored) {
                 addresses = JSON.parse(stored);
             } else {
-                addresses = [{
-                    id: 1715000000000,
-                    title: "Exemple (Cliquez pour modifier)",
-                    freeText: "Ceci est une note.",
-                    specificZone: "Code: 1234",
-                    query: "Tour Eiffel, Paris"
-                }];
+                addresses = [
+                    { id: 1, title: "Bureau (Favori)", freeText: "Réunion 14h", specificZone: "Badge requis", query: "Paris, La Défense", isFav: true },
+                    { id: 2, title: "Client Martin", freeText: "Devis à signer", specificZone: "Code 1234", query: "Lyon Centre", isFav: false },
+                    { id: 3, title: "Maison", freeText: "Acheter du pain", specificZone: "Clé sous le paillasson", query: "Bordeaux Centre", isFav: true }
+                ];
             }
             renderList();
         }
@@ -323,6 +442,38 @@
         function saveToLocal() {
             localStorage.setItem('myAddresses', JSON.stringify(addresses));
             renderList();
+        }
+
+        // --- TRI ---
+        function toggleSort() {
+            isSortedByFav = !isSortedByFav;
+            const btn = document.getElementById('sort-btn');
+            const icon = document.getElementById('sort-icon');
+            const text = document.getElementById('sort-text');
+            
+            if (isSortedByFav) {
+                btn.classList.add('active');
+                icon.textContent = "★";
+                text.textContent = "Favoris en premier";
+            } else {
+                btn.classList.remove('active');
+                icon.textContent = "☆";
+                text.textContent = "Trier Favoris";
+            }
+            renderList();
+        }
+
+        function getSortedAddresses(list) {
+            if (!isSortedByFav) return list;
+
+            return [...list].sort((a, b) => {
+                // 1. Les favoris d'abord
+                if (a.isFav && !b.isFav) return -1;
+                if (!a.isFav && b.isFav) return 1;
+                
+                // 2. À l'intérieur des groupes, ordre alphabétique par titre
+                return a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' });
+            });
         }
 
         // --- EXPORT / IMPORT ---
@@ -353,6 +504,10 @@
                     const imported = JSON.parse(e.target.result);
                     if (Array.isArray(imported)) {
                         addresses = imported;
+                        // Migration des anciennes données sans isFav
+                        addresses.forEach(addr => {
+                            if (addr.isFav === undefined) addr.isFav = false;
+                        });
                         saveToLocal();
                         alert("Restauration réussie !");
                         closeView('detail-view');
@@ -370,9 +525,13 @@
         function renderList(filterText = '') {
             const listContainer = document.getElementById('address-list');
             listContainer.innerHTML = '';
-            const filtered = addresses.filter(addr => 
+            
+            let filtered = addresses.filter(addr => 
                 addr.title.toLowerCase().includes(filterText.toLowerCase())
             );
+            
+            // Application du tri
+            filtered = getSortedAddresses(filtered);
             
             if (filtered.length === 0) {
                 listContainer.innerHTML = '<div style="text-align:center; color:#8E8E93; margin-top:20px;">Aucune adresse</div>';
@@ -382,9 +541,16 @@
             filtered.forEach(addr => {
                 const item = document.createElement('div');
                 item.className = 'address-item';
+                
+                const favStar = addr.isFav ? '★' : '☆';
+                const favClass = addr.isFav ? 'visible' : '';
+                
                 item.innerHTML = `
-                    <div class="address-title">${addr.title}</div>
-                    <div class="address-preview">${addr.freeText || addr.specificZone || ''}</div>
+                    <div class="fav-icon ${favClass}">${favStar}</div>
+                    <div class="item-content">
+                        <div class="address-title">${addr.title}</div>
+                        <div class="address-preview">${addr.freeText || addr.specificZone || ''}</div>
+                    </div>
                 `;
                 item.onclick = () => openDetail(addr.id);
                 listContainer.appendChild(item);
@@ -410,36 +576,31 @@
             view.classList.add('slide-in');
         }
 
-        // --- CORRECTION ICI : PROCESSUS DE MODIFICATION ---
-        
         function startEditProcess() {
             if (!currentId) return;
-            
-            // 1. Récupérer les données de l'adresse actuelle
             const addr = addresses.find(a => a.id === currentId);
             if (!addr) return;
 
-            // 2. Remplir le formulaire AVANT d'afficher la vue
             document.getElementById('f-id').value = addr.id;
             document.getElementById('f-title').value = addr.title;
             document.getElementById('f-query').value = addr.query;
+            document.getElementById('f-fav').checked = addr.isFav || false; // Gestion booléen
             document.getElementById('f-free').value = addr.freeText || '';
             document.getElementById('f-specific').value = addr.specificZone || '';
             
             document.getElementById('form-title-text').textContent = "Modifier l'adresse";
 
-            // 3. Afficher la vue formulaire
             const formView = document.getElementById('form-view');
             formView.style.display = 'flex';
             formView.classList.add('slide-in');
         }
 
         function openForm() {
-            // Mode Création (vide)
             currentId = null;
             document.getElementById('f-id').value = '';
             document.getElementById('f-title').value = '';
             document.getElementById('f-query').value = '';
+            document.getElementById('f-fav').checked = false;
             document.getElementById('f-free').value = '';
             document.getElementById('f-specific').value = '';
             document.getElementById('form-title-text').textContent = "Nouvelle Adresse";
@@ -459,11 +620,11 @@
                 return;
             }
 
+            const isFav = document.getElementById('f-fav').checked;
             const freeText = document.getElementById('f-free').value.trim();
             const specificZone = document.getElementById('f-specific').value.trim();
 
             if (idVal) {
-                // MODIFICATION
                 const idNum = parseInt(idVal);
                 const index = addresses.findIndex(a => a.id === idNum);
                 if (index !== -1) {
@@ -471,16 +632,17 @@
                         id: idNum,
                         title: title,
                         query: query,
+                        isFav: isFav,
                         freeText: freeText,
                         specificZone: specificZone
                     };
                 }
             } else {
-                // CRÉATION
                 addresses.push({
                     id: Date.now(),
                     title: title,
                     query: query,
+                    isFav: isFav,
                     freeText: freeText,
                     specificZone: specificZone
                 });
