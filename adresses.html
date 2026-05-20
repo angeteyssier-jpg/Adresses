@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestion d'Adresses - Sauvegarde Fixée</title>
+    <title>Gestion d'Adresses - Ultime</title>
     <style>
         :root {
             --primary: #007AFF;
@@ -41,7 +38,7 @@
 
         header {
             background-color: var(--card-bg);
-            padding: 15px;
+            padding: 12px 15px; /* Padding réduit pour gagner de la place */
             border-bottom: 1px solid #C6C6C8;
             position: sticky;
             top: 0;
@@ -52,28 +49,29 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .header-title-group {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
-        h1 { font-size: 20px; margin: 0; }
+        h1 { font-size: 18px; margin: 0; font-weight: 700; }
 
         .sort-btn {
-            font-size: 12px;
+            font-size: 13px;
             background: none;
             border: 1px solid var(--text-sec);
             color: var(--text-sec);
-            padding: 4px 8px;
-            border-radius: 6px;
+            padding: 5px 10px;
+            border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
+            font-weight: 600;
         }
         .sort-btn.active {
             border-color: var(--warning);
@@ -82,24 +80,24 @@
         }
 
         .backup-btn {
-            font-size: 12px;
+            font-size: 18px; /* Icones plus grandes */
             background: none;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            padding: 4px 8px;
-            border-radius: 6px;
+            border: none;
             cursor: pointer;
-            margin-left: 5px;
+            margin-left: 8px;
+            padding: 4px;
+            transition: transform 0.1s;
         }
-        .backup-btn.restore { border-color: var(--success); color: var(--success); }
+        .backup-btn:active { transform: scale(0.9); }
+        .backup-btn.restore { }
 
         #search-bar {
             width: 100%;
-            padding: 10px 15px;
-            border-radius: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
             border: 1px solid #C6C6C8;
             background-color: #E3E3E8;
-            font-size: 16px;
+            font-size: 15px;
             box-sizing: border-box;
             outline: none;
         }
@@ -107,50 +105,56 @@
         #address-list {
             flex: 1;
             overflow-y: auto;
-            padding: 10px;
+            padding: 8px;
             padding-bottom: 80px;
         }
 
         .address-item {
             background-color: var(--card-bg);
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 12px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 12px 15px; /* Padding réduit pour plus de lignes */
+            margin-bottom: 6px; /* Espacement réduit */
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             cursor: pointer;
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 12px;
         }
-        .address-item:active { transform: scale(0.98); }
+        .address-item:active { transform: scale(0.98); background-color: #f9f9f9; }
         
         .fav-icon {
             color: var(--warning);
             font-size: 18px;
-            line-height: 1.2;
-            margin-top: 2px;
             flex-shrink: 0;
             visibility: hidden;
+            width: 20px;
+            text-align: center;
         }
         .fav-icon.visible { visibility: visible; }
 
         .item-content { flex: 1; min-width: 0; }
-        .address-title { font-weight: 600; font-size: 17px; margin-bottom: 4px; }
-        .address-preview { color: var(--text-sec); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .address-title { 
+            font-weight: 600; 
+            font-size: 16px; 
+            margin: 0; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         .fab {
             position: fixed;
-            bottom: 25px;
-            right: 25px;
-            width: 56px;
-            height: 56px;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
             background-color: var(--primary);
             color: white;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 30px;
+            font-size: 28px;
             box-shadow: 0 4px 10px rgba(0,122,255,0.4);
             cursor: pointer;
             border: none;
@@ -220,26 +224,27 @@
         }
 
         .section-label { 
-            font-size: 13px; 
+            font-size: 12px; 
             color: var(--text-sec); 
             text-transform: uppercase; 
             margin-bottom: 5px; 
             margin-top: 15px;
-            font-weight: 600; 
+            font-weight: 700; 
             flex-shrink: 0;
+            letter-spacing: 0.5px;
         }
 
         .detail-box-info {
             background-color: var(--card-bg);
             padding: 20px;
             border-radius: 12px;
-            font-size: 17px;
+            font-size: 16px;
             line-height: 1.6;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             white-space: pre-wrap;
             width: 100%;
             box-sizing: border-box;
-            min-height: 200px; 
+            min-height: 180px; 
             flex-grow: 1; 
             overflow-y: auto;
             border: 1px solid rgba(0,0,0,0.05);
@@ -249,7 +254,7 @@
             background-color: var(--card-bg);
             padding: 15px;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 15px;
             line-height: 1.5;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             white-space: pre-wrap;
@@ -264,15 +269,17 @@
             gap: 15px; 
             margin: 20px 0;
             flex-shrink: 0;
+            justify-content: center; /* Centre les boutons */
         }
 
+        /* Boutons plus gros (haut) mais moins larges */
         .action-btn {
-            flex: 1;
-            padding: 16px;
+            flex: 0 1 45%; /* Ne prend pas toute la largeur, max 45% */
+            padding: 18px 10px; /* Plus haut (18px) */
             border: none;
-            border-radius: 14px;
-            font-size: 17px;
-            font-weight: 600;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
             color: white;
             cursor: pointer;
             text-align: center;
@@ -290,32 +297,36 @@
             align-items: center;
             justify-content: space-between;
             background-color: var(--card-bg);
-            padding: 12px 15px;
+            padding: 14px 15px;
             border-radius: 10px;
             margin-bottom: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             flex-shrink: 0;
         }
         .contact-text {
-            font-size: 16px;
+            font-size: 15px;
             color: var(--text);
             flex: 1;
             margin-right: 10px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            font-weight: 500;
         }
+        /* Boutons contact plus gros et moins larges */
         .contact-action-btn {
-            padding: 10px 16px;
-            border-radius: 8px;
+            padding: 12px 20px; /* Plus haut */
+            border-radius: 10px;
             border: none;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             color: white;
             cursor: pointer;
             text-decoration: none;
             white-space: nowrap;
             flex-shrink: 0;
+            min-width: 80px;
+            text-align: center;
         }
         .btn-call { background-color: var(--phone); }
         .btn-mail { background-color: var(--mail); }
@@ -327,16 +338,16 @@
             font-size: 14px;
             text-decoration: underline;
             cursor: pointer;
-            padding: 15px 0;
+            padding: 20px 0;
             margin: 0 auto;
             display: block;
-            opacity: 0.8;
+            opacity: 0.7;
             flex-shrink: 0;
         }
 
         /* Formulaire */
         .form-group { margin-bottom: 15px; }
-        .form-label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-sec); font-size: 14px; }
+        .form-label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-sec); font-size: 13px; text-transform: uppercase; }
         
         .checkbox-group {
             display: flex;
@@ -348,23 +359,10 @@
             border: 1px solid #C6C6C8;
             margin-bottom: 15px;
         }
-        .checkbox-group input {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--warning);
-        }
-        .checkbox-group label {
-            font-size: 17px;
-            font-weight: 500;
-            color: var(--text);
-            margin: 0;
-            cursor: pointer;
-        }
+        .checkbox-group input { width: 20px; height: 20px; accent-color: var(--warning); }
+        .checkbox-group label { font-size: 16px; font-weight: 500; color: var(--text); margin: 0; cursor: pointer; }
 
-        .form-row {
-            display: flex;
-            gap: 15px;
-        }
+        .form-row { display: flex; gap: 15px; }
         .form-row .form-group { flex: 1; }
 
         .form-input, .form-textarea {
@@ -378,20 +376,17 @@
             box-sizing: border-box;
             color: #000;
         }
-        .form-textarea { 
-            min-height: 150px; 
-            resize: vertical; 
-        }
+        .form-textarea { min-height: 150px; resize: vertical; }
         
         .btn-save {
             background-color: var(--primary);
             color: white;
             width: 100%;
-            padding: 15px;
+            padding: 16px;
             border: none;
             border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
+            font-size: 17px;
+            font-weight: 700;
             cursor: pointer;
             margin-top: 20px;
             margin-bottom: 40px;
@@ -409,14 +404,15 @@
         <header>
             <div class="header-top">
                 <div class="header-title-group">
-                    <h1>Mes Adresses</h1>
+                    <h1>Adresses</h1>
+                    <!-- Bouton de Tri Dynamique -->
                     <button class="sort-btn" id="sort-btn" onclick="toggleSort()">
-                        <span id="sort-icon">☆</span> <span id="sort-text">Trier Favoris</span>
+                        <span id="sort-icon">★</span> <span id="sort-text">Favoris</span>
                     </button>
                 </div>
                 <div>
-                    <button class="backup-btn" onclick="exportData()">💾 Sauvegarder</button>
-                    <button class="backup-btn restore" onclick="triggerImport()">📂 Restaurer</button>
+                    <button class="backup-btn" onclick="exportData()" title="Sauvegarder">💾</button>
+                    <button class="backup-btn restore" onclick="triggerImport()" title="Restaurer">📂</button>
                 </div>
             </div>
             <input type="text" id="search-bar" placeholder="Rechercher...">
@@ -445,8 +441,8 @@
             <div class="detail-box-simple" id="d-query"></div>
 
             <div class="actions-container">
-                <a href="#" target="_blank" class="action-btn btn-waze" id="btn-waze">Waze</a>
-                <a href="#" target="_blank" class="action-btn btn-maps" id="btn-maps">Maps</a>
+                <a href="#" target="_blank" class="action-btn btn-waze">Waze</a>
+                <a href="#" target="_blank" class="action-btn btn-maps">Maps</a>
             </div>
 
             <div class="section-label">Téléphones</div>
@@ -470,7 +466,7 @@
             <input type="hidden" id="f-id">
             
             <div class="form-group">
-                <label class="form-label">TITRE</label>
+                <label class="form-label">Titre</label>
                 <input type="text" id="f-title" class="form-input" placeholder="Ex: Maison">
             </div>
 
@@ -481,16 +477,16 @@
 
             <div class="checkbox-group">
                 <input type="checkbox" id="f-fav">
-                <label for="f-fav">Ajouter aux Favoris ★</label>
+                <label for="f-fav">Favori ★</label>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Téléphone 1</label>
+                    <label class="form-label">Tél 1</label>
                     <input type="tel" id="f-phone1" class="form-input" placeholder="06...">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Téléphone 2</label>
+                    <label class="form-label">Tél 2</label>
                     <input type="tel" id="f-phone2" class="form-input" placeholder="01...">
                 </div>
             </div>
@@ -520,33 +516,24 @@
     <script>
         let addresses = [];
         let currentId = null;
-        let isSortedByFav = false;
+        // 0 = Favoris puis Alpha, 1 = Alpha complet
+        let sortMode = 0; 
 
         function init() {
             const stored = localStorage.getItem('myAddresses');
             if (stored) {
                 addresses = JSON.parse(stored);
-                // Migration automatique au chargement si besoin
                 migrateData();
             } else {
                 addresses = [
-                    { 
-                        id: 1, 
-                        title: "Exemple (Favori)", 
-                        phone1: "01 23 45 67 89", 
-                        phone2: "",
-                        email1: "test@exemple.com", 
-                        email2: "",
-                        info: "Ceci est la zone d'information principale.\nElle est très grande pour tout voir.", 
-                        query: "Tour Eiffel, Paris", 
-                        isFav: true 
-                    }
+                    { id: 1, title: "Bureau", phone1: "0123456789", phone2: "", email1: "bureau@test.com", email2: "", info: "Réunion 14h", query: "Paris", isFav: true },
+                    { id: 2, title: "Maison", phone1: "0699887766", phone2: "", email1: "moi@test.com", email2: "", info: "Clé sous le paillasson", query: "Lyon", isFav: false },
+                    { id: 3, title: "Client Martin", phone1: "", phone2: "", email1: "", email2: "", info: "Sonner deux fois", query: "Bordeaux", isFav: false }
                 ];
             }
             renderList();
         }
 
-        // Fonction de migration pour s'assurer que tous les champs existent
         function migrateData() {
             let changed = false;
             addresses.forEach(addr => {
@@ -555,18 +542,11 @@
                 if (!addr.phone2) { addr.phone2 = ""; changed = true; }
                 if (!addr.email1) { addr.email1 = ""; changed = true; }
                 if (!addr.email2) { addr.email2 = ""; changed = true; }
-                // Migration de l'ancien champ 'freeText' vers 'info'
-                if (!addr.info && addr.freeText) { 
-                    addr.info = addr.freeText; 
-                    changed = true; 
-                }
-                // Nettoyage des anciens champs
+                if (!addr.info && addr.freeText) { addr.info = addr.freeText; changed = true; }
                 if (addr.freeText) delete addr.freeText;
                 if (addr.specificZone) delete addr.specificZone;
             });
-            if (changed) {
-                saveToLocal(); // Sauvegarde immédiate de la structure corrigée
-            }
+            if (changed) saveToLocal();
         }
 
         function saveToLocal() {
@@ -575,55 +555,57 @@
         }
 
         function toggleSort() {
-            isSortedByFav = !isSortedByFav;
+            sortMode = sortMode === 0 ? 1 : 0;
             const btn = document.getElementById('sort-btn');
             const icon = document.getElementById('sort-icon');
             const text = document.getElementById('sort-text');
             
-            if (isSortedByFav) {
+            if (sortMode === 0) {
+                // Mode Favoris
                 btn.classList.add('active');
                 icon.textContent = "★";
-                text.textContent = "Favoris en premier";
+                text.textContent = "Favoris";
             } else {
+                // Mode A-Z
                 btn.classList.remove('active');
-                icon.textContent = "☆";
-                text.textContent = "Trier Favoris";
+                icon.textContent = "⇣";
+                text.textContent = "A-Z";
             }
             renderList();
         }
 
         function getSortedAddresses(list) {
-            if (!isSortedByFav) return list;
-            return [...list].sort((a, b) => {
-                if (a.isFav && !b.isFav) return -1;
-                if (!a.isFav && b.isFav) return 1;
+            const sorted = [...list].sort((a, b) => {
                 return a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' });
             });
+
+            if (sortMode === 0) {
+                // Favoris d'abord, puis le reste (déjà triés A-Z grâce au tri précédent)
+                return sorted.sort((a, b) => {
+                    if (a.isFav && !b.isFav) return -1;
+                    if (!a.isFav && b.isFav) return 1;
+                    return 0; // Garde l'ordre A-Z établi avant
+                });
+            }
+            return sorted;
         }
 
-        // --- CORRECTION SAUVEGARDE ICI ---
         function exportData() {
-            // On s'assure que les données sont à jour (migration) avant d'exporter
             migrateData();
-            
             const dataStr = JSON.stringify(addresses, null, 2);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            
-            // Nom de fichier avec DATE et HEURE pour forcer le téléchargement d'un nouveau fichier
             const now = new Date();
             const dateStr = now.toISOString().slice(0,10);
             const timeStr = now.toTimeString().slice(0,5).replace(':', '-');
             a.download = `mes_adresses_${dateStr}_${timeStr}.json`;
-            
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
-            alert("Sauvegarde effectuée avec succès !\nFichier : " + a.download);
+            alert("Sauvegarde : " + a.download);
         }
 
         function triggerImport() {
@@ -639,17 +621,14 @@
                     const imported = JSON.parse(e.target.result);
                     if (Array.isArray(imported)) {
                         addresses = imported;
-                        migrateData(); // Applique la migration sur les données importées
+                        migrateData();
                         saveToLocal();
-                        alert("Restauration réussie ! Les données sont à jour.");
+                        alert("Restauration réussie !");
                         closeView('detail-view');
                         closeView('form-view');
-                    } else {
-                        alert("Format de fichier invalide.");
                     }
                 } catch (err) {
-                    alert("Erreur lors de la lecture du fichier.");
-                    console.error(err);
+                    alert("Erreur de fichier.");
                 }
             };
             reader.readAsText(file);
@@ -667,7 +646,7 @@
             filtered = getSortedAddresses(filtered);
             
             if (filtered.length === 0) {
-                listContainer.innerHTML = '<div style="text-align:center; color:#8E8E93; margin-top:20px;">Aucune adresse</div>';
+                listContainer.innerHTML = '<div style="text-align:center; color:#8E8E93; margin-top:20px; font-size:14px;">Aucune adresse</div>';
                 return;
             }
 
@@ -677,13 +656,11 @@
                 const favStar = addr.isFav ? '★' : '☆';
                 const favClass = addr.isFav ? 'visible' : '';
                 
-                const previewText = addr.info ? addr.info.split('\n')[0] : (addr.phone1 || '');
-
+                // PLUS DE TEXTE D'APERÇU, juste le titre
                 item.innerHTML = `
                     <div class="fav-icon ${favClass}">${favStar}</div>
                     <div class="item-content">
                         <div class="address-title">${addr.title}</div>
-                        <div class="address-preview">${previewText}</div>
                     </div>
                 `;
                 item.onclick = () => openDetail(addr.id);
@@ -698,7 +675,7 @@
             
             return `
                 <div class="contact-row">
-                    <div class="contact-text">${label}: <strong>${value}</strong></div>
+                    <div class="contact-text">${label}: ${value}</div>
                     <a href="${href}" class="contact-action-btn ${btnClass}">${actionLabel}</a>
                 </div>
             `;
@@ -710,7 +687,6 @@
             if (!addr) return;
 
             document.getElementById('d-title').textContent = addr.title;
-            
             const favStar = document.getElementById('d-fav-star');
             favStar.style.display = addr.isFav ? 'block' : 'none';
             
@@ -725,13 +701,13 @@
             let phonesHtml = '';
             if (addr.phone1) phonesHtml += createContactRow('phone', addr.phone1, 'Tél 1', 'Appeler');
             if (addr.phone2) phonesHtml += createContactRow('phone', addr.phone2, 'Tél 2', 'Appeler');
-            phonesContainer.innerHTML = phonesHtml || '<div style="color:#8E8E93; font-style:italic; padding:10px;">Aucun téléphone</div>';
+            phonesContainer.innerHTML = phonesHtml || '<div style="color:#8E8E93; font-style:italic; padding:10px; font-size:14px;">Aucun téléphone</div>';
 
             const emailsContainer = document.getElementById('container-emails');
             let emailsHtml = '';
-            if (addr.email1) emailsHtml += createContactRow('mail', addr.email1, 'Email 1', 'Envoyer');
-            if (addr.email2) emailsHtml += createContactRow('mail', addr.email2, 'Email 2', 'Envoyer');
-            emailsContainer.innerHTML = emailsHtml || '<div style="color:#8E8E93; font-style:italic; padding:10px;">Aucun email</div>';
+            if (addr.email1) emailsHtml += createContactRow('mail', addr.email1, 'Email 1', 'Mail');
+            if (addr.email2) emailsHtml += createContactRow('mail', addr.email2, 'Email 2', 'Mail');
+            emailsContainer.innerHTML = emailsHtml || '<div style="color:#8E8E93; font-style:italic; padding:10px; font-size:14px;">Aucun email</div>';
 
             const view = document.getElementById('detail-view');
             view.style.display = 'flex';
@@ -747,16 +723,13 @@
             document.getElementById('f-title').value = addr.title;
             document.getElementById('f-query').value = addr.query;
             document.getElementById('f-fav').checked = addr.isFav || false;
-            
             document.getElementById('f-phone1').value = addr.phone1 || '';
             document.getElementById('f-phone2').value = addr.phone2 || '';
             document.getElementById('f-email1').value = addr.email1 || '';
             document.getElementById('f-email2').value = addr.email2 || '';
-            
             document.getElementById('f-info').value = addr.info || '';
             
-            document.getElementById('form-title-text').textContent = "Modifier l'adresse";
-
+            document.getElementById('form-title-text').textContent = "Modifier";
             const formView = document.getElementById('form-view');
             formView.style.display = 'flex';
             formView.classList.add('slide-in');
@@ -768,15 +741,12 @@
             document.getElementById('f-title').value = '';
             document.getElementById('f-query').value = '';
             document.getElementById('f-fav').checked = false;
-            
             document.getElementById('f-phone1').value = '';
             document.getElementById('f-phone2').value = '';
             document.getElementById('f-email1').value = '';
             document.getElementById('f-email2').value = '';
-            
             document.getElementById('f-info').value = '';
             document.getElementById('form-title-text').textContent = "Nouvelle Adresse";
-
             const formView = document.getElementById('form-view');
             formView.style.display = 'flex';
             formView.classList.add('slide-in');
@@ -787,35 +757,23 @@
             const title = document.getElementById('f-title').value.trim();
             const query = document.getElementById('f-query').value.trim();
             
-            if (!title || !query) {
-                alert("Titre et Adresse obligatoires.");
-                return;
-            }
-
-            const isFav = document.getElementById('f-fav').checked;
-            const phone1 = document.getElementById('f-phone1').value.trim();
-            const phone2 = document.getElementById('f-phone2').value.trim();
-            const email1 = document.getElementById('f-email1').value.trim();
-            const email2 = document.getElementById('f-email2').value.trim();
-            const info = document.getElementById('f-info').value.trim();
+            if (!title || !query) { alert("Titre et Adresse obligatoires."); return; }
 
             const newData = {
                 title: title,
                 query: query,
-                isFav: isFav,
-                phone1: phone1,
-                phone2: phone2,
-                email1: email1,
-                email2: email2,
-                info: info
+                isFav: document.getElementById('f-fav').checked,
+                phone1: document.getElementById('f-phone1').value.trim(),
+                phone2: document.getElementById('f-phone2').value.trim(),
+                email1: document.getElementById('f-email1').value.trim(),
+                email2: document.getElementById('f-email2').value.trim(),
+                info: document.getElementById('f-info').value.trim()
             };
 
             if (idVal) {
                 const idNum = parseInt(idVal);
                 const index = addresses.findIndex(a => a.id === idNum);
-                if (index !== -1) {
-                    addresses[index] = { id: idNum, ...newData };
-                }
+                if (index !== -1) addresses[index] = { id: idNum, ...newData };
             } else {
                 addresses.push({ id: Date.now(), ...newData });
             }
@@ -826,7 +784,7 @@
 
         function deleteCurrentAddress() {
             if (!currentId) return;
-            if (confirm("Supprimer cette adresse ?")) {
+            if (confirm("Supprimer ?")) {
                 addresses = addresses.filter(a => a.id !== currentId);
                 saveToLocal();
                 closeView('detail-view');
@@ -841,7 +799,6 @@
         }
 
         document.getElementById('search-bar').addEventListener('input', (e) => renderList(e.target.value));
-
         init();
     </script>
 </body>
