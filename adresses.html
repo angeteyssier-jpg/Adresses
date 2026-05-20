@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gestion d'Adresses - Édition Complète</title>
+    <style>
+        :root {
+            --primary: #007AFF;
+            --danger: #FF3B30;
+            --success: #34C759;
+            --bg: #F2F2F7;
+            --card-bg: #FFFFFF;
+            --text: #000000;
+            --text-sec: #8E8E93;
+            --input-bg: #F2F2F7; /* Fond gris pour bien voir les champs */
+            --waze: #33CCFF;
+            --maps: #34A853;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 0;
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header & Liste --- */
+        #list-view {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-bottom: 1px solid #C6C6C8;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        h1 { font-size: 20px; margin: 0; }
+
+        .backup-btn {
+            font-size: 12px;
+            background: none;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 4px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        .backup-btn.restore { border-color: var(--success); color: var(--success); }
+
+        #search-bar {
+            width: 100%;
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid #C6C6C8;
+            background-color: #E3E3E8;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        #address-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            padding-bottom: 80px;
+        }
+
+        .address-item {
+            background-color: var(--card-bg);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            cursor: pointer;
+        }
+        .address-item:active { transform: scale(0.98); }
+        .address-title { font-weight: 600; font-size: 17px; margin-bottom: 4px; }
+        .address-preview { color: var(--text-sec); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Bouton Flottant */
+        .fab {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 56px;
+            height: 56px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            box-shadow: 0 4px 10px rgba(0,122,255,0.4);
+            cursor: pointer;
+            border: none;
+            z-index: 15;
+        }
+
+        /* --- Vues Plein Écran --- */
+        .full-screen-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg);
+            z-index: 20;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .view-header {
+            background-color: var(--card-bg);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #C6C6C8;
+            position: sticky;
+            top: 0;
+        }
+
+        .back-btn, .action-header-btn {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+        .back-btn { color: var(--primary); }
+        .action-header-btn { color: var(--primary); font-weight: 600; }
+
+        .view-content { padding: 20px; flex: 1; }
+
+        /* Détail */
+        .detail-title { font-size: 24px; font-weight: 700; margin-bottom: 20px; }
+        .section-label { font-size: 13px; color: var(--text-sec); text-transform: uppercase; margin-bottom: 5px; font-weight: 600; margin-top: 15px; }
+        .detail-box {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 16px;
+            line-height: 1.5;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            white-space: pre-wrap;
+        }
+        .actions-container { display: flex; gap: 15px; margin-top: 30px; padding-bottom: 40px; }
+        .action-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-waze { background-color: var(--waze); }
+        .btn-maps { background-color: var(--maps); }
+        .btn-edit { background-color: var(--primary); margin-top: 15px; width: 100%; }
+
+        /* Formulaire - CORRECTION ICI */
+        .form-group { margin-bottom: 20px; }
+        .form-label { 
+            display: block; 
+            font-weight: 600; 
+            margin-bottom: 8px; 
+            color: var(--text-sec); 
+            font-size: 14px; 
+        }
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #C6C6C8;
+            background-color: var(--card-bg); /* Fond blanc pour contraster */
+            font-size: 17px; /* Taille légèrement plus grande */
+            font-family: inherit;
+            box-sizing: border-box;
+            color: #000;
+        }
+        .form-input:focus, .form-textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            background-color: #fff;
+        }
+        .form-textarea { min-height: 100px; resize: vertical; }
+        
+        .btn-save {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        #file-input { display: none; }
+        .slide-in { animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <!-- VUE LISTE -->
+    <div id="list-view">
+        <header>
+            <div class="header-top">
+                <h1>Mes Adresses</h1>
+                <div>
+                    <button class="backup-btn" onclick="exportData()">💾 Sauvegarder</button>
+                    <button class="backup-btn restore" onclick="triggerImport()">📂 Restaurer</button>
+                </div>
+            </div>
+            <input type="text" id="search-bar" placeholder="Rechercher...">
+        </header>
+        <div id="address-list"></div>
+        <button class="fab" onclick="openForm()">+</button>
+    </div>
+
+    <!-- VUE DÉTAIL -->
+    <div id="detail-view" class="full-screen-view">
+        <div class="view-header">
+            <button class="back-btn" onclick="closeView('detail-view')">← Retour</button>
+            <button class="action-header-btn" onclick="openFormFromDetail()">Modifier</button>
+        </div>
+        <div class="view-content">
+            <div class="detail-title" id="d-title">Titre</div>
+            
+            <div class="section-label">Zone Libre</div>
+            <div class="detail-box" id="d-free"></div>
+
+            <div class="section-label">Zone Particulière</div>
+            <div class="detail-box" id="d-specific"></div>
+
+            <div class="section-label">Adresse GPS</div>
+            <div class="detail-box" id="d-query" style="color: var(--primary);"></div>
+
+            <div class="actions-container">
+                <a href="#" target="_blank" class="action-btn btn-waze" id="btn-waze">Waze</a>
+                <a href="#" target="_blank" class="action-btn btn-maps" id="btn-maps">Maps</a>
+            </div>
+            
+            <button class="action-btn btn-edit" style="background-color: var(--danger); margin-top:20px;" onclick="deleteCurrentAddress()">Supprimer</button>
+        </div>
+    </div>
+
+    <!-- VUE FORMULAIRE (CORRIGÉE) -->
+    <div id="form-view" class="full-screen-view">
+        <div class="view-header">
+            <button class="back-btn" onclick="closeView('form-view')">Annuler</button>
+            <h2 style="margin:0; font-size:18px;" id="form-title-text">Nouvelle Adresse</h2>
+            <div style="width:50px;"></div>
+        </div>
+        <div class="view-content">
+            <input type="hidden" id="f-id">
+            
+            <!-- CHAMP TITRE BIEN VISIBLE -->
+            <div class="form-group">
+                <label class="form-label">TITRE (Modifiable)</label>
+                <input type="text" id="f-title" class="form-input" placeholder="Ex: Maison, Bureau...">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Adresse GPS (Waze/Maps)</label>
+                <input type="text" id="f-query" class="form-input" placeholder="Ex: 10 Rue de la Paix, Paris">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Zone Libre (Notes)</label>
+                <textarea id="f-free" class="form-textarea" placeholder="Vos notes..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Zone Particulière (Instructions)</label>
+                <textarea id="f-specific" class="form-textarea" placeholder="Code, étage..."></textarea>
+            </div>
+
+            <button class="btn-save" onclick="saveAddress()">Enregistrer les modifications</button>
+        </div>
+    </div>
+
+    <input type="file" id="file-input" accept=".json" onchange="importData(this)">
+
+    <script>
+        let addresses = [];
+        let currentId = null;
+
+        function init() {
+            const stored = localStorage.getItem('myAddresses');
+            if (stored) {
+                addresses = JSON.parse(stored);
+            } else {
+                addresses = [{
+                    id: Date.now(),
+                    title: "Exemple (Modifiez-moi !)",
+                    freeText: "Ceci est une note test.",
+                    specificZone: "Code porte : 1234",
+                    query: "Tour Eiffel, Paris"
+                }];
+            }
+            renderList();
+        }
+
+        function saveToLocal() {
+            localStorage.setItem('myAddresses', JSON.stringify(addresses));
+            renderList();
+        }
+
+        // --- EXPORT / IMPORT ---
+        function exportData(silent = false) {
+            const dataStr = JSON.stringify(addresses, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const date = new Date().toISOString().slice(0,10);
+            a.download = `mes_adresses_${date}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            if (!silent) alert("Fichier de sauvegarde téléchargé !");
+        }
+
+        function triggerImport() {
+            document.getElementById('file-input').click();
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported)) {
+                        addresses = imported;
+                        saveToLocal();
+                        alert("Restauration réussie !");
+                        closeView('detail-view');
+                        closeView('form-view');
+                    } else {
+                        alert("Format invalide.");
+                    }
+                } catch (err) {
+                    alert("Erreur de lecture.");
+                }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        // --- NAVIGATION & AFFICHAGE ---
+        function renderList(filterText = '') {
+            const listContainer = document.getElementById('address-list');
+            listContainer.innerHTML = '';
+            const filtered = addresses.filter(addr => 
+                addr.title.toLowerCase().includes(filterText.toLowerCase()) || 
+                (addr.freeText && addr.freeText.toLowerCase().includes(filterText.toLowerCase()))
+            );
+            if (filtered.length === 0) {
+                listContainer.innerHTML = '<div style="text-align:center; color:#8E8E93; margin-top:20px;">Aucune adresse</div>';
+                return;
+            }
+            filtered.forEach(addr => {
+                const item = document.createElement('div');
+                item.className = 'address-item';
+                item.innerHTML = `
+                    <div class="address-title">${addr.title}</div>
+                    <div class="address-preview">${addr.freeText || addr.specificZone || 'Aucune note'}</div>
+                `;
+                item.onclick = () => openDetail(addr.id);
+                listContainer.appendChild(item);
+            });
+        }
+
+        function openDetail(id) {
+            const addr = addresses.find(a => a.id === id);
+            if (!addr) return;
+            currentId = id;
+
+            document.getElementById('d-title').textContent = addr.title;
+            document.getElementById('d-free').textContent = addr.freeText || "Aucune note.";
+            document.getElementById('d-specific').textContent = addr.specificZone || "Aucune info.";
+            document.getElementById('d-query').textContent = addr.query;
+
+            const encoded = encodeURIComponent(addr.query);
+            document.getElementById('btn-waze').href = `https://waze.com/ul?q=${encoded}`;
+            document.getElementById('btn-maps').href = `https://www.google.com/maps/search/?api=1&query=${encoded}`;
+
+            const view = document.getElementById('detail-view');
+            view.style.display = 'flex';
+            view.classList.add('slide-in');
+        }
+
+        function openFormFromDetail() {
+            closeView('detail-view');
+            setTimeout(() => openForm(currentId), 300);
+        }
+
+        function openForm(editId = null) {
+            currentId = editId;
+            const formTitle = document.getElementById('form-title-text');
+            
+            // Réinitialisation visuelle
+            document.getElementById('f-title').value = '';
+            document.getElementById('f-query').value = '';
+            document.getElementById('f-free').value = '';
+            document.getElementById('f-specific').value = '';
+
+            if (editId) {
+                const addr = addresses.find(a => a.id === editId);
+                formTitle.textContent = "Modifier l'adresse";
+                // REMPLISSAGE DES CHAMPS
+                document.getElementById('f-title').value = addr.title;
+                document.getElementById('f-query').value = addr.query;
+                document.getElementById('f-free').value = addr.freeText || '';
+                document.getElementById('f-specific').value = addr.specificZone || '';
+            } else {
+                formTitle.textContent = "Nouvelle Adresse";
+            }
+
+            const view = document.getElementById('form-view');
+            view.style.display = 'flex';
+            view.classList.add('slide-in');
+        }
+
+        function saveAddress() {
+            const title = document.getElementById('f-title').value.trim();
+            const query = document.getElementById('f-query').value.trim();
+            
+            if (!title || !query) {
+                alert("Le Titre et l'Adresse GPS sont obligatoires.");
+                return;
+            }
+
+            const freeText = document.getElementById('f-free').value.trim();
+            const specificZone = document.getElementById('f-specific').value.trim();
+
+            if (currentId) {
+                // MODIFICATION
+                const idx = addresses.findIndex(a => a.id === currentId);
+                if (idx !== -1) {
+                    addresses[idx] = { 
+                        id: currentId, 
+                        title: title, // Le titre est bien mis à jour ici
+                        query: query, 
+                        freeText: freeText, 
+                        specificZone: specificZone 
+                    };
+                }
+            } else {
+                // CRÉATION
+                addresses.push({ 
+                    id: Date.now(), 
+                    title: title, 
+                    query: query, 
+                    freeText: freeText, 
+                    specificZone: specificZone 
+                });
+            }
+
+            saveToLocal();
+            closeView('form-view');
+        }
+
+        function deleteCurrentAddress() {
+            if (!currentId) return;
+            if (confirm("Supprimer cette adresse définitivement ?")) {
+                addresses = addresses.filter(a => a.id !== currentId);
+                saveToLocal();
+                closeView('detail-view');
+            }
+        }
+
+        function closeView(viewId) {
+            const view = document.getElementById(viewId);
+            view.style.display = 'none';
+            view.classList.remove('slide-in');
+            if(viewId === 'detail-view') currentId = null;
+        }
+
+        document.getElementById('search-bar').addEventListener('input', (e) => renderList(e.target.value));
+
+        init();
+    </script>
+</body>
+</html>
