@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestion d'Adresses - Informations Prioritaires</title>
+    <title>Gestion d'Adresses - Sauvegarde Fixée</title>
     <style>
         :root {
             --primary: #007AFF;
@@ -200,7 +200,7 @@
             flex-direction: column;
         }
 
-        /* Détail - NOUVELLE STRUCTURE */
+        /* Détail */
         .detail-header-row {
             display: flex;
             align-items: center;
@@ -229,7 +229,6 @@
             flex-shrink: 0;
         }
 
-        /* Zone Informations : La plus grande */
         .detail-box-info {
             background-color: var(--card-bg);
             padding: 20px;
@@ -240,9 +239,8 @@
             white-space: pre-wrap;
             width: 100%;
             box-sizing: border-box;
-            /* Priorité maximale à cette zone */
             min-height: 200px; 
-            flex-grow: 1; /* Prend tout l'espace disponible */
+            flex-grow: 1; 
             overflow-y: auto;
             border: 1px solid rgba(0,0,0,0.05);
         }
@@ -261,7 +259,6 @@
             font-weight: 500;
         }
 
-        /* Boutons Waze/Maps */
         .actions-container { 
             display: flex; 
             gap: 15px; 
@@ -288,7 +285,6 @@
         .btn-waze { background-color: var(--waze); }
         .btn-maps { background-color: var(--maps); }
 
-        /* Lignes Contact avec Bouton Action */
         .contact-row {
             display: flex;
             align-items: center;
@@ -383,7 +379,7 @@
             color: #000;
         }
         .form-textarea { 
-            min-height: 150px; /* Plus grand par défaut pour les infos */
+            min-height: 150px; 
             resize: vertical; 
         }
         
@@ -419,8 +415,8 @@
                     </button>
                 </div>
                 <div>
-                    <button class="backup-btn" onclick="exportData()">💾</button>
-                    <button class="backup-btn restore" onclick="triggerImport()">📂</button>
+                    <button class="backup-btn" onclick="exportData()">💾 Sauvegarder</button>
+                    <button class="backup-btn restore" onclick="triggerImport()">📂 Restaurer</button>
                 </div>
             </div>
             <input type="text" id="search-bar" placeholder="Rechercher...">
@@ -429,7 +425,7 @@
         <button class="fab" onclick="openForm()">+</button>
     </div>
 
-    <!-- VUE DÉTAIL (RESTRUCTURÉE) -->
+    <!-- VUE DÉTAIL -->
     <div id="detail-view" class="full-screen-view">
         <div class="view-header">
             <button class="back-btn" onclick="closeView('detail-view')">← Retour</button>
@@ -437,39 +433,28 @@
         </div>
         
         <div class="view-content">
-            <!-- Titre + Favori -->
             <div class="detail-header-row">
                 <div class="detail-title" id="d-title">Titre</div>
                 <div class="detail-fav-star" id="d-fav-star" style="display:none;">★</div>
             </div>
             
-            <!-- Zone Informations (Prioritaire) -->
             <div class="section-label">Informations</div>
             <div class="detail-box-info" id="d-info"></div>
 
-            <!-- Adresse GPS -->
             <div class="section-label">Adresse GPS</div>
             <div class="detail-box-simple" id="d-query"></div>
 
-            <!-- Boutons Navigation -->
             <div class="actions-container">
                 <a href="#" target="_blank" class="action-btn btn-waze" id="btn-waze">Waze</a>
                 <a href="#" target="_blank" class="action-btn btn-maps" id="btn-maps">Maps</a>
             </div>
 
-            <!-- Téléphones -->
             <div class="section-label">Téléphones</div>
-            <div id="container-phones">
-                <!-- Injecté par JS -->
-            </div>
+            <div id="container-phones"></div>
 
-            <!-- Emails -->
             <div class="section-label">Emails</div>
-            <div id="container-emails">
-                <!-- Injecté par JS -->
-            </div>
+            <div id="container-emails"></div>
 
-            <!-- Supprimer -->
             <button class="btn-delete-small" onclick="deleteCurrentAddress()">Supprimer cette adresse</button>
         </div>
     </div>
@@ -522,7 +507,7 @@
             </div>
 
             <div class="form-group">
-                <label class="form-label">Informations (Notes importantes)</label>
+                <label class="form-label">Informations</label>
                 <textarea id="f-info" class="form-textarea" placeholder="Détails, codes, instructions..."></textarea>
             </div>
 
@@ -541,33 +526,47 @@
             const stored = localStorage.getItem('myAddresses');
             if (stored) {
                 addresses = JSON.parse(stored);
+                // Migration automatique au chargement si besoin
+                migrateData();
             } else {
                 addresses = [
                     { 
                         id: 1, 
-                        title: "Bureau (Favori)", 
+                        title: "Exemple (Favori)", 
                         phone1: "01 23 45 67 89", 
-                        phone2: "06 12 34 56 78",
-                        email1: "contact@bureau.com", 
-                        email2: "",
-                        info: "Réunion à 14h en salle B.\nBadge obligatoire à l'accueil.\nPrévenir 10min avant.", 
-                        query: "Paris, La Défense", 
-                        isFav: true 
-                    },
-                    { 
-                        id: 2, 
-                        title: "Maison", 
-                        phone1: "06 99 88 77 66", 
                         phone2: "",
-                        email1: "moi@maison.com", 
+                        email1: "test@exemple.com", 
                         email2: "",
-                        info: "Clé sous le paillasson si je suis en retard.\nNe pas sonner après 22h.", 
-                        query: "Bordeaux Centre", 
-                        isFav: false 
+                        info: "Ceci est la zone d'information principale.\nElle est très grande pour tout voir.", 
+                        query: "Tour Eiffel, Paris", 
+                        isFav: true 
                     }
                 ];
             }
             renderList();
+        }
+
+        // Fonction de migration pour s'assurer que tous les champs existent
+        function migrateData() {
+            let changed = false;
+            addresses.forEach(addr => {
+                if (addr.isFav === undefined) { addr.isFav = false; changed = true; }
+                if (!addr.phone1) { addr.phone1 = ""; changed = true; }
+                if (!addr.phone2) { addr.phone2 = ""; changed = true; }
+                if (!addr.email1) { addr.email1 = ""; changed = true; }
+                if (!addr.email2) { addr.email2 = ""; changed = true; }
+                // Migration de l'ancien champ 'freeText' vers 'info'
+                if (!addr.info && addr.freeText) { 
+                    addr.info = addr.freeText; 
+                    changed = true; 
+                }
+                // Nettoyage des anciens champs
+                if (addr.freeText) delete addr.freeText;
+                if (addr.specificZone) delete addr.specificZone;
+            });
+            if (changed) {
+                saveToLocal(); // Sauvegarde immédiate de la structure corrigée
+            }
         }
 
         function saveToLocal() {
@@ -602,18 +601,29 @@
             });
         }
 
+        // --- CORRECTION SAUVEGARDE ICI ---
         function exportData() {
+            // On s'assure que les données sont à jour (migration) avant d'exporter
+            migrateData();
+            
             const dataStr = JSON.stringify(addresses, null, 2);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `mes_adresses_${new Date().toISOString().slice(0,10)}.json`;
+            
+            // Nom de fichier avec DATE et HEURE pour forcer le téléchargement d'un nouveau fichier
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0,10);
+            const timeStr = now.toTimeString().slice(0,5).replace(':', '-');
+            a.download = `mes_adresses_${dateStr}_${timeStr}.json`;
+            
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            alert("Sauvegarde téléchargée !");
+            
+            alert("Sauvegarde effectuée avec succès !\nFichier : " + a.download);
         }
 
         function triggerImport() {
@@ -629,25 +639,17 @@
                     const imported = JSON.parse(e.target.result);
                     if (Array.isArray(imported)) {
                         addresses = imported;
-                        // Migration des anciens champs
-                        addresses.forEach(addr => {
-                            if (addr.isFav === undefined) addr.isFav = false;
-                            if (!addr.phone1) addr.phone1 = "";
-                            if (!addr.phone2) addr.phone2 = "";
-                            if (!addr.email1) addr.email1 = "";
-                            if (!addr.email2) addr.email2 = "";
-                            // Migration de freeText vers info si besoin
-                            if (!addr.info && addr.freeText) addr.info = addr.freeText;
-                            delete addr.freeText;
-                            delete addr.specificZone;
-                        });
+                        migrateData(); // Applique la migration sur les données importées
                         saveToLocal();
-                        alert("Restauration réussie !");
+                        alert("Restauration réussie ! Les données sont à jour.");
                         closeView('detail-view');
                         closeView('form-view');
+                    } else {
+                        alert("Format de fichier invalide.");
                     }
                 } catch (err) {
-                    alert("Erreur de fichier.");
+                    alert("Erreur lors de la lecture du fichier.");
+                    console.error(err);
                 }
             };
             reader.readAsText(file);
@@ -675,7 +677,6 @@
                 const favStar = addr.isFav ? '★' : '☆';
                 const favClass = addr.isFav ? 'visible' : '';
                 
-                // Aperçu sur les informations
                 const previewText = addr.info ? addr.info.split('\n')[0] : (addr.phone1 || '');
 
                 item.innerHTML = `
@@ -710,29 +711,22 @@
 
             document.getElementById('d-title').textContent = addr.title;
             
-            // Gestion Favori dans le titre
             const favStar = document.getElementById('d-fav-star');
             favStar.style.display = addr.isFav ? 'block' : 'none';
             
-            // Informations (Zone principale)
             document.getElementById('d-info').textContent = addr.info || "Aucune information.";
-
-            // Adresse
             document.getElementById('d-query').textContent = addr.query;
 
-            // Liens GPS
             const encoded = encodeURIComponent(addr.query);
             document.getElementById('btn-waze').href = `https://waze.com/ul?q=${encoded}`;
             document.getElementById('btn-maps').href = `https://www.google.com/maps/search/?api=1&query=${encoded}`;
 
-            // Téléphones
             const phonesContainer = document.getElementById('container-phones');
             let phonesHtml = '';
             if (addr.phone1) phonesHtml += createContactRow('phone', addr.phone1, 'Tél 1', 'Appeler');
             if (addr.phone2) phonesHtml += createContactRow('phone', addr.phone2, 'Tél 2', 'Appeler');
             phonesContainer.innerHTML = phonesHtml || '<div style="color:#8E8E93; font-style:italic; padding:10px;">Aucun téléphone</div>';
 
-            // Emails
             const emailsContainer = document.getElementById('container-emails');
             let emailsHtml = '';
             if (addr.email1) emailsHtml += createContactRow('mail', addr.email1, 'Email 1', 'Envoyer');
