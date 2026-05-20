@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="fr">
-    <title>Gestion d'Adresses - Ultime</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gestion d'Adresses - Correction Clic</title>
     <style>
         :root {
             --primary: #007AFF;
@@ -38,7 +41,7 @@
 
         header {
             background-color: var(--card-bg);
-            padding: 12px 15px; /* Padding réduit pour gagner de la place */
+            padding: 12px 15px;
             border-bottom: 1px solid #C6C6C8;
             position: sticky;
             top: 0;
@@ -80,7 +83,7 @@
         }
 
         .backup-btn {
-            font-size: 18px; /* Icones plus grandes */
+            font-size: 18px;
             background: none;
             border: none;
             cursor: pointer;
@@ -89,7 +92,6 @@
             transition: transform 0.1s;
         }
         .backup-btn:active { transform: scale(0.9); }
-        .backup-btn.restore { }
 
         #search-bar {
             width: 100%;
@@ -111,16 +113,20 @@
 
         .address-item {
             background-color: var(--card-bg);
-            padding: 12px 15px; /* Padding réduit pour plus de lignes */
-            margin-bottom: 6px; /* Espacement réduit */
+            padding: 12px 15px;
+            margin-bottom: 6px;
             border-radius: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 12px;
+            transition: background-color 0.2s;
         }
-        .address-item:active { transform: scale(0.98); background-color: #f9f9f9; }
+        .address-item:active { 
+            transform: scale(0.98); 
+            background-color: #f0f0f0;
+        }
         
         .fav-icon {
             color: var(--warning);
@@ -269,13 +275,12 @@
             gap: 15px; 
             margin: 20px 0;
             flex-shrink: 0;
-            justify-content: center; /* Centre les boutons */
+            justify-content: center;
         }
 
-        /* Boutons plus gros (haut) mais moins larges */
         .action-btn {
-            flex: 0 1 45%; /* Ne prend pas toute la largeur, max 45% */
-            padding: 18px 10px; /* Plus haut (18px) */
+            flex: 0 1 45%;
+            padding: 18px 10px;
             border: none;
             border-radius: 12px;
             font-size: 16px;
@@ -313,9 +318,8 @@
             text-overflow: ellipsis;
             font-weight: 500;
         }
-        /* Boutons contact plus gros et moins larges */
         .contact-action-btn {
-            padding: 12px 20px; /* Plus haut */
+            padding: 12px 20px;
             border-radius: 10px;
             border: none;
             font-size: 14px;
@@ -405,7 +409,6 @@
             <div class="header-top">
                 <div class="header-title-group">
                     <h1>Adresses</h1>
-                    <!-- Bouton de Tri Dynamique -->
                     <button class="sort-btn" id="sort-btn" onclick="toggleSort()">
                         <span id="sort-icon">★</span> <span id="sort-text">Favoris</span>
                     </button>
@@ -441,8 +444,8 @@
             <div class="detail-box-simple" id="d-query"></div>
 
             <div class="actions-container">
-                <a href="#" target="_blank" class="action-btn btn-waze">Waze</a>
-                <a href="#" target="_blank" class="action-btn btn-maps">Maps</a>
+                <a href="#" target="_blank" class="action-btn btn-waze" id="btn-waze">Waze</a>
+                <a href="#" target="_blank" class="action-btn btn-maps" id="btn-maps">Maps</a>
             </div>
 
             <div class="section-label">Téléphones</div>
@@ -516,8 +519,7 @@
     <script>
         let addresses = [];
         let currentId = null;
-        // 0 = Favoris puis Alpha, 1 = Alpha complet
-        let sortMode = 0; 
+        let sortMode = 0; // 0 = Favoris puis Alpha, 1 = Alpha complet
 
         function init() {
             const stored = localStorage.getItem('myAddresses');
@@ -527,8 +529,7 @@
             } else {
                 addresses = [
                     { id: 1, title: "Bureau", phone1: "0123456789", phone2: "", email1: "bureau@test.com", email2: "", info: "Réunion 14h", query: "Paris", isFav: true },
-                    { id: 2, title: "Maison", phone1: "0699887766", phone2: "", email1: "moi@test.com", email2: "", info: "Clé sous le paillasson", query: "Lyon", isFav: false },
-                    { id: 3, title: "Client Martin", phone1: "", phone2: "", email1: "", email2: "", info: "Sonner deux fois", query: "Bordeaux", isFav: false }
+                    { id: 2, title: "Maison", phone1: "0699887766", phone2: "", email1: "moi@test.com", email2: "", info: "Clé sous le paillasson", query: "Lyon", isFav: false }
                 ];
             }
             renderList();
@@ -561,12 +562,10 @@
             const text = document.getElementById('sort-text');
             
             if (sortMode === 0) {
-                // Mode Favoris
                 btn.classList.add('active');
                 icon.textContent = "★";
                 text.textContent = "Favoris";
             } else {
-                // Mode A-Z
                 btn.classList.remove('active');
                 icon.textContent = "⇣";
                 text.textContent = "A-Z";
@@ -580,11 +579,10 @@
             });
 
             if (sortMode === 0) {
-                // Favoris d'abord, puis le reste (déjà triés A-Z grâce au tri précédent)
                 return sorted.sort((a, b) => {
                     if (a.isFav && !b.isFav) return -1;
                     if (!a.isFav && b.isFav) return 1;
-                    return 0; // Garde l'ordre A-Z établi avant
+                    return 0;
                 });
             }
             return sorted;
@@ -656,14 +654,15 @@
                 const favStar = addr.isFav ? '★' : '☆';
                 const favClass = addr.isFav ? 'visible' : '';
                 
-                // PLUS DE TEXTE D'APERÇU, juste le titre
                 item.innerHTML = `
                     <div class="fav-icon ${favClass}">${favStar}</div>
                     <div class="item-content">
                         <div class="address-title">${addr.title}</div>
                     </div>
                 `;
+                // CORRECTION ICI : Réactivation du clic
                 item.onclick = () => openDetail(addr.id);
+                
                 listContainer.appendChild(item);
             });
         }
