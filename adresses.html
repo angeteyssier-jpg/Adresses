@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestion d'Adresses - Correction Clic</title>
+    <title>Gestion d'Adresses</title>
     <style>
         :root {
             --primary: #007AFF;
@@ -41,33 +41,46 @@
 
         header {
             background-color: var(--card-bg);
-            padding: 12px 15px;
+            padding: 10px 15px;
             border-bottom: 1px solid #C6C6C8;
             position: sticky;
             top: 0;
             z-index: 10;
         }
 
-        .header-top {
+        .header-row-1 {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
         }
 
-        .header-title-group {
+        .header-controls {
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
-        h1 { font-size: 18px; margin: 0; font-weight: 700; }
+        h1 { font-size: 18px; margin: 0; font-weight: 700; display: inline-block; margin-right: 8px; }
 
-        .sort-btn {
+        .cat-select {
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid #C6C6C8;
+            background-color: #E3E3E8;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            outline: none;
+            max-width: 160px;
+        }
+
+        .cat-manage-btn {
             font-size: 13px;
             background: none;
-            border: 1px solid var(--text-sec);
-            color: var(--text-sec);
+            border: 1px solid var(--primary);
+            color: var(--primary);
             padding: 5px 10px;
             border-radius: 8px;
             cursor: pointer;
@@ -75,11 +88,7 @@
             align-items: center;
             gap: 5px;
             font-weight: 600;
-        }
-        .sort-btn.active {
-            border-color: var(--warning);
-            color: var(--warning);
-            background-color: rgba(255, 149, 0, 0.1);
+            white-space: nowrap;
         }
 
         .backup-btn {
@@ -89,9 +98,7 @@
             cursor: pointer;
             margin-left: 8px;
             padding: 4px;
-            transition: transform 0.1s;
         }
-        .backup-btn:active { transform: scale(0.9); }
 
         #search-bar {
             width: 100%;
@@ -121,12 +128,8 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            transition: background-color 0.2s;
         }
-        .address-item:active { 
-            transform: scale(0.98); 
-            background-color: #f0f0f0;
-        }
+        .address-item:active { transform: scale(0.98); background-color: #f0f0f0; }
         
         .fav-icon {
             color: var(--warning);
@@ -139,14 +142,7 @@
         .fav-icon.visible { visibility: visible; }
 
         .item-content { flex: 1; min-width: 0; }
-        .address-title { 
-            font-weight: 600; 
-            font-size: 16px; 
-            margin: 0; 
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .address-title { font-weight: 600; font-size: 16px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .fab {
             position: fixed;
@@ -203,43 +199,13 @@
         .back-btn { color: var(--primary); }
         .action-header-btn { color: var(--primary); font-weight: 600; }
 
-        .view-content { 
-            padding: 20px; 
-            flex: 1; 
-            display: flex;
-            flex-direction: column;
-        }
+        .view-content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
 
         /* Détail */
-        .detail-header-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-shrink: 0;
-        }
-        .detail-title { 
-            font-size: 24px; 
-            font-weight: 700; 
-            margin: 0;
-        }
-        .detail-fav-star {
-            color: var(--warning);
-            font-size: 24px;
-            line-height: 1;
-        }
-
-        .section-label { 
-            font-size: 12px; 
-            color: var(--text-sec); 
-            text-transform: uppercase; 
-            margin-bottom: 5px; 
-            margin-top: 15px;
-            font-weight: 700; 
-            flex-shrink: 0;
-            letter-spacing: 0.5px;
-        }
-
+        .detail-header-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-shrink: 0; }
+        .detail-title { font-size: 24px; font-weight: 700; margin: 0; }
+        .detail-fav-star { color: var(--warning); font-size: 24px; line-height: 1; }
+        .section-label { font-size: 12px; color: var(--text-sec); text-transform: uppercase; margin-bottom: 5px; margin-top: 15px; font-weight: 700; letter-spacing: 0.5px; flex-shrink: 0; }
         .detail-box-info {
             background-color: var(--card-bg);
             padding: 20px;
@@ -255,7 +221,6 @@
             overflow-y: auto;
             border: 1px solid rgba(0,0,0,0.05);
         }
-
         .detail-box-simple {
             background-color: var(--card-bg);
             padding: 15px;
@@ -269,15 +234,7 @@
             color: var(--primary);
             font-weight: 500;
         }
-
-        .actions-container { 
-            display: flex; 
-            gap: 15px; 
-            margin: 20px 0;
-            flex-shrink: 0;
-            justify-content: center;
-        }
-
+        .actions-container { display: flex; gap: 15px; margin: 20px 0; flex-shrink: 0; justify-content: center; }
         .action-btn {
             flex: 0 1 45%;
             padding: 18px 10px;
@@ -308,16 +265,7 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             flex-shrink: 0;
         }
-        .contact-text {
-            font-size: 15px;
-            color: var(--text);
-            flex: 1;
-            margin-right: 10px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-weight: 500;
-        }
+        .contact-text { font-size: 15px; color: var(--text); flex: 1; margin-right: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
         .contact-action-btn {
             padding: 12px 20px;
             border-radius: 10px;
@@ -334,7 +282,6 @@
         }
         .btn-call { background-color: var(--phone); }
         .btn-mail { background-color: var(--mail); }
-
         .btn-delete-small {
             background: none;
             border: none;
@@ -349,10 +296,9 @@
             flex-shrink: 0;
         }
 
-        /* Formulaire */
+        /* Formulaire & Catégories */
         .form-group { margin-bottom: 15px; }
         .form-label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-sec); font-size: 13px; text-transform: uppercase; }
-        
         .checkbox-group {
             display: flex;
             align-items: center;
@@ -365,11 +311,9 @@
         }
         .checkbox-group input { width: 20px; height: 20px; accent-color: var(--warning); }
         .checkbox-group label { font-size: 16px; font-weight: 500; color: var(--text); margin: 0; cursor: pointer; }
-
         .form-row { display: flex; gap: 15px; }
         .form-row .form-group { flex: 1; }
-
-        .form-input, .form-textarea {
+        .form-input, .form-textarea, .form-select {
             width: 100%;
             padding: 12px;
             border-radius: 10px;
@@ -381,7 +325,6 @@
             color: #000;
         }
         .form-textarea { min-height: 150px; resize: vertical; }
-        
         .btn-save {
             background-color: var(--primary);
             color: white;
@@ -396,6 +339,42 @@
             margin-bottom: 40px;
         }
 
+        /* Gestion Catégories */
+        .cat-list-item {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .cat-name { font-weight: 600; font-size: 16px; }
+        .cat-actions button {
+            background: none;
+            border: none;
+            font-size: 14px;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 6px;
+            margin-left: 5px;
+        }
+        .btn-edit-cat { color: var(--primary); background-color: rgba(0,122,255,0.1); }
+        .btn-del-cat { color: var(--danger); background-color: rgba(255,59,48,0.1); }
+        .btn-add-cat {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
         #file-input { display: none; }
         .slide-in { animation: slideIn 0.3s ease-out; }
         @keyframes slideIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -406,19 +385,20 @@
     <!-- VUE LISTE -->
     <div id="list-view">
         <header>
-            <div class="header-top">
-                <div class="header-title-group">
-                    <h1>Adresses</h1>
-                    <button class="sort-btn" id="sort-btn" onclick="toggleSort()">
-                        <span id="sort-icon">★</span> <span id="sort-text">Favoris</span>
-                    </button>
-                </div>
-                <div>
+            <div class="header-row-1">
+                <h1>Adresses</h1>
+                <div class="header-controls">
+                    <select id="cat-filter" class="cat-select" onchange="renderList()">
+                        <option value="all">Toutes les cat.</option>
+                    </select>
+                    
+                    <button class="cat-manage-btn" onclick="openCatManager()">Cat.</button>
+                    
                     <button class="backup-btn" onclick="exportData()" title="Sauvegarder">💾</button>
                     <button class="backup-btn restore" onclick="triggerImport()" title="Restaurer">📂</button>
                 </div>
             </div>
-            <input type="text" id="search-bar" placeholder="Rechercher...">
+            <input type="text" id="search-bar" placeholder="Rechercher dans toutes les adresses...">
         </header>
         <div id="address-list"></div>
         <button class="fab" onclick="openForm()">+</button>
@@ -430,7 +410,6 @@
             <button class="back-btn" onclick="closeView('detail-view')">← Retour</button>
             <button class="action-header-btn" onclick="startEditProcess()">Modifier</button>
         </div>
-        
         <div class="view-content">
             <div class="detail-header-row">
                 <div class="detail-title" id="d-title">Titre</div>
@@ -458,7 +437,7 @@
         </div>
     </div>
 
-    <!-- VUE FORMULAIRE -->
+    <!-- VUE FORMULAIRE ADRESSE -->
     <div id="form-view" class="full-screen-view">
         <div class="view-header">
             <button class="back-btn" onclick="closeView('form-view')">Annuler</button>
@@ -471,6 +450,11 @@
             <div class="form-group">
                 <label class="form-label">Titre</label>
                 <input type="text" id="f-title" class="form-input" placeholder="Ex: Maison">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Catégorie</label>
+                <select id="f-cat" class="form-select"></select>
             </div>
 
             <div class="form-group">
@@ -514,24 +498,52 @@
         </div>
     </div>
 
+    <!-- VUE GESTION CATÉGORIES -->
+    <div id="cat-manager-view" class="full-screen-view">
+        <div class="view-header">
+            <button class="back-btn" onclick="closeView('cat-manager-view')">← Retour</button>
+            <h2 style="margin:0; font-size:18px;">Gérer les Catégories</h2>
+            <div style="width:50px;"></div>
+        </div>
+        <div class="view-content">
+            <div id="cat-list-container"></div>
+            <button class="btn-add-cat" onclick="createNewCategory()">+ Créer une catégorie</button>
+        </div>
+    </div>
+
     <input type="file" id="file-input" accept=".json" onchange="importData(this)">
 
     <script>
         let addresses = [];
+        let categories = [];
+        const DEFAULT_CAT_NAME = "Aucune catégorie";
         let currentId = null;
-        let sortMode = 0; // 0 = Favoris puis Alpha, 1 = Alpha complet
 
         function init() {
-            const stored = localStorage.getItem('myAddresses');
-            if (stored) {
-                addresses = JSON.parse(stored);
-                migrateData();
+            const storedAddr = localStorage.getItem('myAddresses');
+            const storedCat = localStorage.getItem('myCategories');
+
+            if (storedAddr) addresses = JSON.parse(storedAddr);
+            else addresses = [];
+
+            if (storedCat) {
+                categories = JSON.parse(storedCat);
+                if (!categories.find(c => c.name === DEFAULT_CAT_NAME)) {
+                    categories.unshift({ id: Date.now(), name: DEFAULT_CAT_NAME });
+                }
             } else {
-                addresses = [
-                    { id: 1, title: "Bureau", phone1: "0123456789", phone2: "", email1: "bureau@test.com", email2: "", info: "Réunion 14h", query: "Paris", isFav: true },
-                    { id: 2, title: "Maison", phone1: "0699887766", phone2: "", email1: "moi@test.com", email2: "", info: "Clé sous le paillasson", query: "Lyon", isFav: false }
-                ];
+                categories = [{ id: 1, name: DEFAULT_CAT_NAME }];
             }
+
+            migrateData();
+            updateCatSelects();
+            
+            // DÉFAUT : Sélectionner "Aucune catégorie" au démarrage
+            const defaultCat = categories.find(c => c.name === DEFAULT_CAT_NAME);
+            if (defaultCat) {
+                document.getElementById('cat-filter').value = defaultCat.id;
+            }
+            
             renderList();
         }
 
@@ -546,111 +558,107 @@
                 if (!addr.info && addr.freeText) { addr.info = addr.freeText; changed = true; }
                 if (addr.freeText) delete addr.freeText;
                 if (addr.specificZone) delete addr.specificZone;
-            });
-            if (changed) saveToLocal();
-        }
-
-        function saveToLocal() {
-            localStorage.setItem('myAddresses', JSON.stringify(addresses));
-            renderList();
-        }
-
-        function toggleSort() {
-            sortMode = sortMode === 0 ? 1 : 0;
-            const btn = document.getElementById('sort-btn');
-            const icon = document.getElementById('sort-icon');
-            const text = document.getElementById('sort-text');
-            
-            if (sortMode === 0) {
-                btn.classList.add('active');
-                icon.textContent = "★";
-                text.textContent = "Favoris";
-            } else {
-                btn.classList.remove('active');
-                icon.textContent = "⇣";
-                text.textContent = "A-Z";
-            }
-            renderList();
-        }
-
-        function getSortedAddresses(list) {
-            const sorted = [...list].sort((a, b) => {
-                return a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' });
-            });
-
-            if (sortMode === 0) {
-                return sorted.sort((a, b) => {
-                    if (a.isFav && !b.isFav) return -1;
-                    if (!a.isFav && b.isFav) return 1;
-                    return 0;
-                });
-            }
-            return sorted;
-        }
-
-        function exportData() {
-            migrateData();
-            const dataStr = JSON.stringify(addresses, null, 2);
-            const blob = new Blob([dataStr], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            const now = new Date();
-            const dateStr = now.toISOString().slice(0,10);
-            const timeStr = now.toTimeString().slice(0,5).replace(':', '-');
-            a.download = `mes_adresses_${dateStr}_${timeStr}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            alert("Sauvegarde : " + a.download);
-        }
-
-        function triggerImport() {
-            document.getElementById('file-input').click();
-        }
-
-        function importData(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const imported = JSON.parse(e.target.result);
-                    if (Array.isArray(imported)) {
-                        addresses = imported;
-                        migrateData();
-                        saveToLocal();
-                        alert("Restauration réussie !");
-                        closeView('detail-view');
-                        closeView('form-view');
-                    }
-                } catch (err) {
-                    alert("Erreur de fichier.");
+                if (!addr.categoryId) {
+                    const defaultCat = categories.find(c => c.name === DEFAULT_CAT_NAME);
+                    addr.categoryId = defaultCat ? defaultCat.id : categories[0].id;
+                    changed = true;
                 }
-            };
-            reader.readAsText(file);
-            input.value = '';
+            });
+            if (changed) saveAll();
         }
 
-        function renderList(filterText = '') {
+        function saveAll() {
+            localStorage.setItem('myAddresses', JSON.stringify(addresses));
+            localStorage.setItem('myCategories', JSON.stringify(categories));
+            updateCatSelects();
+            renderList();
+        }
+
+        function updateCatSelects() {
+            const filterSelect = document.getElementById('cat-filter');
+            const formSelect = document.getElementById('f-cat');
+            const currentFilter = filterSelect.value;
+
+            filterSelect.innerHTML = '<option value="all">Toutes les cat.</option>';
+            formSelect.innerHTML = '';
+
+            const sortedCats = [...categories].sort((a, b) => {
+                return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' });
+            });
+
+            sortedCats.forEach(cat => {
+                const opt1 = document.createElement('option');
+                opt1.value = cat.id;
+                opt1.textContent = cat.name;
+                filterSelect.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = cat.id;
+                opt2.textContent = cat.name;
+                formSelect.appendChild(opt2);
+            });
+
+            // Restaurer la sélection si elle existe toujours, sinon rester sur le défaut
+            if (currentFilter && categories.find(c => c.id == currentFilter)) {
+                filterSelect.value = currentFilter;
+            } else {
+                const defaultCat = categories.find(c => c.name === DEFAULT_CAT_NAME);
+                if (defaultCat) filterSelect.value = defaultCat.id;
+            }
+        }
+
+        function renderList() {
             const listContainer = document.getElementById('address-list');
+            const filterCat = document.getElementById('cat-filter').value;
+            const rawSearchText = document.getElementById('search-bar').value;
+            
+            // Normalisation pour gérer les accents (re trouve Rémi)
+            const searchText = rawSearchText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        
             listContainer.innerHTML = '';
             
-            let filtered = addresses.filter(addr => 
-                addr.title.toLowerCase().includes(filterText.toLowerCase()) ||
-                (addr.info && addr.info.toLowerCase().includes(filterText.toLowerCase()))
-            );
-            filtered = getSortedAddresses(filtered);
+            let finalList = [];
+        
+            // --- CAS 1 : RECHERCHE ACTIVE ---
+            if (searchText !== "") {
+                // On ignore la catégorie. On cherche UNIQUEMENT dans le TITRE.
+                finalList = addresses.filter(addr => {
+                    const titleNorm = (addr.title || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    return titleNorm.includes(searchText);
+                });
+        
+                // Tri alphabétique simple
+                finalList.sort((a, b) => a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' }));
+            } 
             
-            if (filtered.length === 0) {
-                listContainer.innerHTML = '<div style="text-align:center; color:#8E8E93; margin-top:20px; font-size:14px;">Aucune adresse</div>';
+            // --- CAS 2 : RECHERCHE VIDE ---
+            else {
+                // 1. TOUS LES FAVORIS (Le filtre catégorie est ignoré pour les favoris)
+                const favorites = addresses.filter(addr => addr.isFav);
+                favorites.sort((a, b) => a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' }));
+        
+                // 2. LES AUTRES (Respectent le filtre catégorie)
+                const others = addresses.filter(addr => {
+                    if (addr.isFav) return false; // Déjà dans le groupe 1
+                    if (filterCat === 'all') return true;
+                    return addr.categoryId == filterCat;
+                });
+                others.sort((a, b) => a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' }));
+        
+                // Fusion : Favoris toujours en premier, puis les autres filtrés
+                finalList = [...favorites, ...others];
+            }
+        
+            // --- AFFICHAGE ---
+            if (finalList.length === 0) {
+                listContainer.innerHTML = '<div style="text-align:center; color:#8E8E93; margin-top:20px; font-size:14px;">Aucune adresse trouvée</div>';
                 return;
             }
-
-            filtered.forEach(addr => {
+        
+            finalList.forEach(addr => {
                 const item = document.createElement('div');
                 item.className = 'address-item';
+                
                 const favStar = addr.isFav ? '★' : '☆';
                 const favClass = addr.isFav ? 'visible' : '';
                 
@@ -660,24 +668,17 @@
                         <div class="address-title">${addr.title}</div>
                     </div>
                 `;
-                // CORRECTION ICI : Réactivation du clic
                 item.onclick = () => openDetail(addr.id);
-                
                 listContainer.appendChild(item);
             });
         }
+        
 
         function createContactRow(type, value, label, actionLabel) {
             if (!value) return '';
             const href = type === 'phone' ? `tel:${value}` : `mailto:${value}`;
             const btnClass = type === 'phone' ? 'btn-call' : 'btn-mail';
-            
-            return `
-                <div class="contact-row">
-                    <div class="contact-text">${label}: ${value}</div>
-                    <a href="${href}" class="contact-action-btn ${btnClass}">${actionLabel}</a>
-                </div>
-            `;
+            return `<div class="contact-row"><div class="contact-text">${label}: ${value}</div><a href="${href}" class="contact-action-btn ${btnClass}">${actionLabel}</a></div>`;
         }
 
         function openDetail(id) {
@@ -686,9 +687,7 @@
             if (!addr) return;
 
             document.getElementById('d-title').textContent = addr.title;
-            const favStar = document.getElementById('d-fav-star');
-            favStar.style.display = addr.isFav ? 'block' : 'none';
-            
+            document.getElementById('d-fav-star').style.display = addr.isFav ? 'block' : 'none';
             document.getElementById('d-info').textContent = addr.info || "Aucune information.";
             document.getElementById('d-query').textContent = addr.query;
 
@@ -720,6 +719,7 @@
 
             document.getElementById('f-id').value = addr.id;
             document.getElementById('f-title').value = addr.title;
+            document.getElementById('f-cat').value = addr.categoryId;
             document.getElementById('f-query').value = addr.query;
             document.getElementById('f-fav').checked = addr.isFav || false;
             document.getElementById('f-phone1').value = addr.phone1 || '';
@@ -736,8 +736,11 @@
 
         function openForm() {
             currentId = null;
+            const defaultCat = categories.find(c => c.name === DEFAULT_CAT_NAME);
+            
             document.getElementById('f-id').value = '';
             document.getElementById('f-title').value = '';
+            document.getElementById('f-cat').value = defaultCat ? defaultCat.id : categories[0].id;
             document.getElementById('f-query').value = '';
             document.getElementById('f-fav').checked = false;
             document.getElementById('f-phone1').value = '';
@@ -746,6 +749,7 @@
             document.getElementById('f-email2').value = '';
             document.getElementById('f-info').value = '';
             document.getElementById('form-title-text').textContent = "Nouvelle Adresse";
+            
             const formView = document.getElementById('form-view');
             formView.style.display = 'flex';
             formView.classList.add('slide-in');
@@ -760,6 +764,7 @@
 
             const newData = {
                 title: title,
+                categoryId: parseInt(document.getElementById('f-cat').value),
                 query: query,
                 isFav: document.getElementById('f-fav').checked,
                 phone1: document.getElementById('f-phone1').value.trim(),
@@ -777,7 +782,7 @@
                 addresses.push({ id: Date.now(), ...newData });
             }
 
-            saveToLocal();
+            saveAll();
             closeView('form-view');
         }
 
@@ -785,9 +790,147 @@
             if (!currentId) return;
             if (confirm("Supprimer ?")) {
                 addresses = addresses.filter(a => a.id !== currentId);
-                saveToLocal();
+                saveAll();
                 closeView('detail-view');
             }
+        }
+
+        // --- GESTION CATÉGORIES ---
+
+        function openCatManager() {
+            renderCatList();
+            const view = document.getElementById('cat-manager-view');
+            view.style.display = 'flex';
+            view.classList.add('slide-in');
+        }
+
+        function renderCatList() {
+            const container = document.getElementById('cat-list-container');
+            container.innerHTML = '';
+            
+            const sortedCats = [...categories].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
+            
+            sortedCats.forEach(cat => {
+                const isDefault = cat.name === DEFAULT_CAT_NAME;
+                const item = document.createElement('div');
+                item.className = 'cat-list-item';
+                
+                let actionsHtml = '';
+                if (!isDefault) {
+                    actionsHtml = `
+                        <div class="cat-actions">
+                            <button class="btn-edit-cat" onclick="editCategory(${cat.id})">Modifier</button>
+                            <button class="btn-del-cat" onclick="deleteCategory(${cat.id})">Suppr.</button>
+                        </div>
+                    `;
+                } else {
+                    actionsHtml = `<span style="font-size:12px; color:#8E8E93; font-style:italic;">Système</span>`;
+                }
+
+                item.innerHTML = `
+                    <div class="cat-name">${cat.name}</div>
+                    ${actionsHtml}
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function createNewCategory() {
+            const name = prompt("Nom de la nouvelle catégorie :");
+            if (name && name.trim() !== "") {
+                if (categories.find(c => c.name.toLowerCase() === name.trim().toLowerCase())) {
+                    alert("Cette catégorie existe déjà.");
+                    return;
+                }
+                categories.push({ id: Date.now(), name: name.trim() });
+                saveAll();
+                renderCatList();
+            }
+        }
+
+        function editCategory(id) {
+            const cat = categories.find(c => c.id === id);
+            if (!cat) return;
+            const newName = prompt("Nouveau nom :", cat.name);
+            if (newName && newName.trim() !== "") {
+                if (categories.find(c => c.name.toLowerCase() === newName.trim().toLowerCase() && c.id !== id)) {
+                    alert("Cette catégorie existe déjà.");
+                    return;
+                }
+                cat.name = newName.trim();
+                saveAll();
+                renderCatList();
+            }
+        }
+
+        function deleteCategory(id) {
+            const cat = categories.find(c => c.id === id);
+            if (!cat || cat.name === DEFAULT_CAT_NAME) return;
+            
+            if (confirm(`Supprimer la catégorie "${cat.name}" ?\nLes adresses associées seront déplacées vers "${DEFAULT_CAT_NAME}".`)) {
+                const defaultCat = categories.find(c => c.name === DEFAULT_CAT_NAME);
+                addresses.forEach(addr => {
+                    if (addr.categoryId === id) addr.categoryId = defaultCat.id;
+                });
+                categories = categories.filter(c => c.id !== id);
+                saveAll();
+                renderCatList();
+            }
+        }
+
+        // --- EXPORT / IMPORT ---
+        function exportData() {
+            const data = { addresses: addresses, categories: categories, version: 2 };
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0,10);
+            const timeStr = now.toTimeString().slice(0,5).replace(':', '-');
+            a.download = `mes_adresses_${dateStr}_${timeStr}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert("Sauvegarde : " + a.download);
+        }
+
+        function triggerImport() {
+            document.getElementById('file-input').click();
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.version === 2 && Array.isArray(data.addresses) && Array.isArray(data.categories)) {
+                        addresses = data.addresses;
+                        categories = data.categories;
+                        migrateData();
+                        saveAll();
+                        alert("Restauration réussie !");
+                        closeView('detail-view'); closeView('form-view'); closeView('cat-manager-view');
+                    } else if (Array.isArray(data)) {
+                        addresses = data;
+                        if (!categories.length) categories = [{ id: 1, name: DEFAULT_CAT_NAME }];
+                        migrateData();
+                        saveAll();
+                        alert("Restauration (ancien format) réussie !");
+                        closeView('detail-view'); closeView('form-view'); closeView('cat-manager-view');
+                    } else {
+                        alert("Format invalide.");
+                    }
+                } catch (err) {
+                    alert("Erreur de lecture.");
+                }
+            };
+            reader.readAsText(file);
+            input.value = '';
         }
 
         function closeView(viewId) {
@@ -797,7 +940,7 @@
             if (viewId === 'detail-view') currentId = null;
         }
 
-        document.getElementById('search-bar').addEventListener('input', (e) => renderList(e.target.value));
+        document.getElementById('search-bar').addEventListener('input', () => renderList());
         init();
     </script>
 </body>
