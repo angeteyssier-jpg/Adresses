@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestion d'Adresses - Édition Complète</title>
+    <title>Gestion d'Adresses - Correction Modif</title>
     <style>
         :root {
             --primary: #007AFF;
@@ -13,7 +13,6 @@
             --card-bg: #FFFFFF;
             --text: #000000;
             --text-sec: #8E8E93;
-            --input-bg: #F2F2F7; /* Fond gris pour bien voir les champs */
             --waze: #33CCFF;
             --maps: #34A853;
         }
@@ -97,7 +96,6 @@
         .address-title { font-weight: 600; font-size: 17px; margin-bottom: 4px; }
         .address-preview { color: var(--text-sec); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Bouton Flottant */
         .fab {
             position: fixed;
             bottom: 25px;
@@ -126,7 +124,7 @@
             height: 100%;
             background-color: var(--bg);
             z-index: 20;
-            display: none;
+            display: none; /* Caché par défaut */
             flex-direction: column;
             overflow-y: auto;
         }
@@ -185,32 +183,21 @@
         }
         .btn-waze { background-color: var(--waze); }
         .btn-maps { background-color: var(--maps); }
-        .btn-edit { background-color: var(--primary); margin-top: 15px; width: 100%; }
+        .btn-edit-global { background-color: var(--primary); margin-top: 15px; width: 100%; }
 
-        /* Formulaire - CORRECTION ICI */
+        /* Formulaire */
         .form-group { margin-bottom: 20px; }
-        .form-label { 
-            display: block; 
-            font-weight: 600; 
-            margin-bottom: 8px; 
-            color: var(--text-sec); 
-            font-size: 14px; 
-        }
+        .form-label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-sec); font-size: 14px; }
         .form-input, .form-textarea {
             width: 100%;
             padding: 12px;
             border-radius: 10px;
             border: 1px solid #C6C6C8;
-            background-color: var(--card-bg); /* Fond blanc pour contraster */
-            font-size: 17px; /* Taille légèrement plus grande */
+            background-color: var(--card-bg);
+            font-size: 17px;
             font-family: inherit;
             box-sizing: border-box;
             color: #000;
-        }
-        .form-input:focus, .form-textarea:focus {
-            border-color: var(--primary);
-            outline: none;
-            background-color: #fff;
         }
         .form-textarea { min-height: 100px; resize: vertical; }
         
@@ -254,7 +241,7 @@
     <div id="detail-view" class="full-screen-view">
         <div class="view-header">
             <button class="back-btn" onclick="closeView('detail-view')">← Retour</button>
-            <button class="action-header-btn" onclick="openFormFromDetail()">Modifier</button>
+            <button class="action-header-btn" id="btn-modify-header" onclick="startEditProcess()">Modifier</button>
         </div>
         <div class="view-content">
             <div class="detail-title" id="d-title">Titre</div>
@@ -273,11 +260,11 @@
                 <a href="#" target="_blank" class="action-btn btn-maps" id="btn-maps">Maps</a>
             </div>
             
-            <button class="action-btn btn-edit" style="background-color: var(--danger); margin-top:20px;" onclick="deleteCurrentAddress()">Supprimer</button>
+            <button class="action-btn btn-edit-global" style="background-color: var(--danger); margin-top:20px;" onclick="deleteCurrentAddress()">Supprimer</button>
         </div>
     </div>
 
-    <!-- VUE FORMULAIRE (CORRIGÉE) -->
+    <!-- VUE FORMULAIRE -->
     <div id="form-view" class="full-screen-view">
         <div class="view-header">
             <button class="back-btn" onclick="closeView('form-view')">Annuler</button>
@@ -287,28 +274,27 @@
         <div class="view-content">
             <input type="hidden" id="f-id">
             
-            <!-- CHAMP TITRE BIEN VISIBLE -->
             <div class="form-group">
-                <label class="form-label">TITRE (Modifiable)</label>
-                <input type="text" id="f-title" class="form-input" placeholder="Ex: Maison, Bureau...">
+                <label class="form-label">TITRE</label>
+                <input type="text" id="f-title" class="form-input" placeholder="Ex: Maison">
             </div>
 
             <div class="form-group">
-                <label class="form-label">Adresse GPS (Waze/Maps)</label>
-                <input type="text" id="f-query" class="form-input" placeholder="Ex: 10 Rue de la Paix, Paris">
+                <label class="form-label">Adresse GPS</label>
+                <input type="text" id="f-query" class="form-input" placeholder="Ex: 10 Rue de la Paix">
             </div>
 
             <div class="form-group">
-                <label class="form-label">Zone Libre (Notes)</label>
-                <textarea id="f-free" class="form-textarea" placeholder="Vos notes..."></textarea>
+                <label class="form-label">Zone Libre</label>
+                <textarea id="f-free" class="form-textarea" placeholder="Notes..."></textarea>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Zone Particulière (Instructions)</label>
-                <textarea id="f-specific" class="form-textarea" placeholder="Code, étage..."></textarea>
+                <label class="form-label">Zone Particulière</label>
+                <textarea id="f-specific" class="form-textarea" placeholder="Instructions..."></textarea>
             </div>
 
-            <button class="btn-save" onclick="saveAddress()">Enregistrer les modifications</button>
+            <button class="btn-save" onclick="saveAddress()">Enregistrer</button>
         </div>
     </div>
 
@@ -316,7 +302,7 @@
 
     <script>
         let addresses = [];
-        let currentId = null;
+        let currentId = null; // ID de l'adresse actuellement visualisée
 
         function init() {
             const stored = localStorage.getItem('myAddresses');
@@ -324,10 +310,10 @@
                 addresses = JSON.parse(stored);
             } else {
                 addresses = [{
-                    id: Date.now(),
-                    title: "Exemple (Modifiez-moi !)",
-                    freeText: "Ceci est une note test.",
-                    specificZone: "Code porte : 1234",
+                    id: 1715000000000,
+                    title: "Exemple (Cliquez pour modifier)",
+                    freeText: "Ceci est une note.",
+                    specificZone: "Code: 1234",
                     query: "Tour Eiffel, Paris"
                 }];
             }
@@ -340,19 +326,18 @@
         }
 
         // --- EXPORT / IMPORT ---
-        function exportData(silent = false) {
+        function exportData() {
             const dataStr = JSON.stringify(addresses, null, 2);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            const date = new Date().toISOString().slice(0,10);
-            a.download = `mes_adresses_${date}.json`;
+            a.download = `mes_adresses_${new Date().toISOString().slice(0,10)}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            if (!silent) alert("Fichier de sauvegarde téléchargé !");
+            alert("Sauvegarde téléchargée !");
         }
 
         function triggerImport() {
@@ -372,35 +357,34 @@
                         alert("Restauration réussie !");
                         closeView('detail-view');
                         closeView('form-view');
-                    } else {
-                        alert("Format invalide.");
                     }
                 } catch (err) {
-                    alert("Erreur de lecture.");
+                    alert("Erreur de fichier.");
                 }
             };
             reader.readAsText(file);
             input.value = '';
         }
 
-        // --- NAVIGATION & AFFICHAGE ---
+        // --- NAVIGATION ---
         function renderList(filterText = '') {
             const listContainer = document.getElementById('address-list');
             listContainer.innerHTML = '';
             const filtered = addresses.filter(addr => 
-                addr.title.toLowerCase().includes(filterText.toLowerCase()) || 
-                (addr.freeText && addr.freeText.toLowerCase().includes(filterText.toLowerCase()))
+                addr.title.toLowerCase().includes(filterText.toLowerCase())
             );
+            
             if (filtered.length === 0) {
                 listContainer.innerHTML = '<div style="text-align:center; color:#8E8E93; margin-top:20px;">Aucune adresse</div>';
                 return;
             }
+
             filtered.forEach(addr => {
                 const item = document.createElement('div');
                 item.className = 'address-item';
                 item.innerHTML = `
                     <div class="address-title">${addr.title}</div>
-                    <div class="address-preview">${addr.freeText || addr.specificZone || 'Aucune note'}</div>
+                    <div class="address-preview">${addr.freeText || addr.specificZone || ''}</div>
                 `;
                 item.onclick = () => openDetail(addr.id);
                 listContainer.appendChild(item);
@@ -408,13 +392,13 @@
         }
 
         function openDetail(id) {
+            currentId = id;
             const addr = addresses.find(a => a.id === id);
             if (!addr) return;
-            currentId = id;
 
             document.getElementById('d-title').textContent = addr.title;
-            document.getElementById('d-free').textContent = addr.freeText || "Aucune note.";
-            document.getElementById('d-specific').textContent = addr.specificZone || "Aucune info.";
+            document.getElementById('d-free').textContent = addr.freeText || "";
+            document.getElementById('d-specific').textContent = addr.specificZone || "";
             document.getElementById('d-query').textContent = addr.query;
 
             const encoded = encodeURIComponent(addr.query);
@@ -426,70 +410,79 @@
             view.classList.add('slide-in');
         }
 
-        function openFormFromDetail() {
-            closeView('detail-view');
-            setTimeout(() => openForm(currentId), 300);
+        // --- CORRECTION ICI : PROCESSUS DE MODIFICATION ---
+        
+        function startEditProcess() {
+            if (!currentId) return;
+            
+            // 1. Récupérer les données de l'adresse actuelle
+            const addr = addresses.find(a => a.id === currentId);
+            if (!addr) return;
+
+            // 2. Remplir le formulaire AVANT d'afficher la vue
+            document.getElementById('f-id').value = addr.id;
+            document.getElementById('f-title').value = addr.title;
+            document.getElementById('f-query').value = addr.query;
+            document.getElementById('f-free').value = addr.freeText || '';
+            document.getElementById('f-specific').value = addr.specificZone || '';
+            
+            document.getElementById('form-title-text').textContent = "Modifier l'adresse";
+
+            // 3. Afficher la vue formulaire
+            const formView = document.getElementById('form-view');
+            formView.style.display = 'flex';
+            formView.classList.add('slide-in');
         }
 
-        function openForm(editId = null) {
-            currentId = editId;
-            const formTitle = document.getElementById('form-title-text');
-            
-            // Réinitialisation visuelle
+        function openForm() {
+            // Mode Création (vide)
+            currentId = null;
+            document.getElementById('f-id').value = '';
             document.getElementById('f-title').value = '';
             document.getElementById('f-query').value = '';
             document.getElementById('f-free').value = '';
             document.getElementById('f-specific').value = '';
+            document.getElementById('form-title-text').textContent = "Nouvelle Adresse";
 
-            if (editId) {
-                const addr = addresses.find(a => a.id === editId);
-                formTitle.textContent = "Modifier l'adresse";
-                // REMPLISSAGE DES CHAMPS
-                document.getElementById('f-title').value = addr.title;
-                document.getElementById('f-query').value = addr.query;
-                document.getElementById('f-free').value = addr.freeText || '';
-                document.getElementById('f-specific').value = addr.specificZone || '';
-            } else {
-                formTitle.textContent = "Nouvelle Adresse";
-            }
-
-            const view = document.getElementById('form-view');
-            view.style.display = 'flex';
-            view.classList.add('slide-in');
+            const formView = document.getElementById('form-view');
+            formView.style.display = 'flex';
+            formView.classList.add('slide-in');
         }
 
         function saveAddress() {
+            const idVal = document.getElementById('f-id').value;
             const title = document.getElementById('f-title').value.trim();
             const query = document.getElementById('f-query').value.trim();
             
             if (!title || !query) {
-                alert("Le Titre et l'Adresse GPS sont obligatoires.");
+                alert("Titre et Adresse obligatoires.");
                 return;
             }
 
             const freeText = document.getElementById('f-free').value.trim();
             const specificZone = document.getElementById('f-specific').value.trim();
 
-            if (currentId) {
+            if (idVal) {
                 // MODIFICATION
-                const idx = addresses.findIndex(a => a.id === currentId);
-                if (idx !== -1) {
-                    addresses[idx] = { 
-                        id: currentId, 
-                        title: title, // Le titre est bien mis à jour ici
-                        query: query, 
-                        freeText: freeText, 
-                        specificZone: specificZone 
+                const idNum = parseInt(idVal);
+                const index = addresses.findIndex(a => a.id === idNum);
+                if (index !== -1) {
+                    addresses[index] = {
+                        id: idNum,
+                        title: title,
+                        query: query,
+                        freeText: freeText,
+                        specificZone: specificZone
                     };
                 }
             } else {
                 // CRÉATION
-                addresses.push({ 
-                    id: Date.now(), 
-                    title: title, 
-                    query: query, 
-                    freeText: freeText, 
-                    specificZone: specificZone 
+                addresses.push({
+                    id: Date.now(),
+                    title: title,
+                    query: query,
+                    freeText: freeText,
+                    specificZone: specificZone
                 });
             }
 
@@ -499,7 +492,7 @@
 
         function deleteCurrentAddress() {
             if (!currentId) return;
-            if (confirm("Supprimer cette adresse définitivement ?")) {
+            if (confirm("Supprimer cette adresse ?")) {
                 addresses = addresses.filter(a => a.id !== currentId);
                 saveToLocal();
                 closeView('detail-view');
@@ -510,7 +503,7 @@
             const view = document.getElementById(viewId);
             view.style.display = 'none';
             view.classList.remove('slide-in');
-            if(viewId === 'detail-view') currentId = null;
+            if (viewId === 'detail-view') currentId = null;
         }
 
         document.getElementById('search-bar').addEventListener('input', (e) => renderList(e.target.value));
