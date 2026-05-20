@@ -3,19 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestion d'Adresses - Favoris</title>
+    <title>Gestion d'Adresses - Informations Prioritaires</title>
     <style>
         :root {
             --primary: #007AFF;
             --danger: #FF3B30;
             --success: #34C759;
-            --warning: #FF9500; /* Couleur pour les favoris */
+            --warning: #FF9500;
             --bg: #F2F2F7;
             --card-bg: #FFFFFF;
             --text: #000000;
             --text-sec: #8E8E93;
             --waze: #33CCFF;
             --maps: #34A853;
+            --phone: #34C759;
+            --mail: #007AFF;
         }
 
         body {
@@ -128,7 +130,7 @@
             line-height: 1.2;
             margin-top: 2px;
             flex-shrink: 0;
-            visibility: hidden; /* Caché par défaut si pas favori */
+            visibility: hidden;
         }
         .fav-icon.visible { visibility: visible; }
 
@@ -198,9 +200,25 @@
             flex-direction: column;
         }
 
-        /* Détail */
-        .detail-title { font-size: 24px; font-weight: 700; margin-bottom: 20px; flex-shrink: 0; }
-        
+        /* Détail - NOUVELLE STRUCTURE */
+        .detail-header-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        .detail-title { 
+            font-size: 24px; 
+            font-weight: 700; 
+            margin: 0;
+        }
+        .detail-fav-star {
+            color: var(--warning);
+            font-size: 24px;
+            line-height: 1;
+        }
+
         .section-label { 
             font-size: 13px; 
             color: var(--text-sec); 
@@ -211,29 +229,45 @@
             flex-shrink: 0;
         }
 
-        .detail-box {
+        /* Zone Informations : La plus grande */
+        .detail-box-info {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 17px;
+            line-height: 1.6;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            white-space: pre-wrap;
+            width: 100%;
+            box-sizing: border-box;
+            /* Priorité maximale à cette zone */
+            min-height: 200px; 
+            flex-grow: 1; /* Prend tout l'espace disponible */
+            overflow-y: auto;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .detail-box-simple {
             background-color: var(--card-bg);
             padding: 15px;
             border-radius: 10px;
             font-size: 16px;
-            line-height: 1.6;
+            line-height: 1.5;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             white-space: pre-wrap;
             width: 100%;
             box-sizing: border-box;
-            min-height: 120px; 
-            max-height: 40vh;
-            overflow-y: auto;
+            color: var(--primary);
+            font-weight: 500;
         }
 
-        .bottom-actions-wrapper {
-            margin-top: auto;
-            padding-top: 30px;
-            padding-bottom: 20px;
+        /* Boutons Waze/Maps */
+        .actions-container { 
+            display: flex; 
+            gap: 15px; 
+            margin: 20px 0;
             flex-shrink: 0;
         }
-
-        .actions-container { display: flex; gap: 15px; margin-bottom: 15px; }
 
         .action-btn {
             flex: 1;
@@ -254,6 +288,42 @@
         .btn-waze { background-color: var(--waze); }
         .btn-maps { background-color: var(--maps); }
 
+        /* Lignes Contact avec Bouton Action */
+        .contact-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--card-bg);
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+        .contact-text {
+            font-size: 16px;
+            color: var(--text);
+            flex: 1;
+            margin-right: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .contact-action-btn {
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .btn-call { background-color: var(--phone); }
+        .btn-mail { background-color: var(--mail); }
+
         .btn-delete-small {
             background: none;
             border: none;
@@ -261,14 +331,15 @@
             font-size: 14px;
             text-decoration: underline;
             cursor: pointer;
-            padding: 10px;
+            padding: 15px 0;
             margin: 0 auto;
             display: block;
             opacity: 0.8;
+            flex-shrink: 0;
         }
 
         /* Formulaire */
-        .form-group { margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
         .form-label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-sec); font-size: 14px; }
         
         .checkbox-group {
@@ -279,6 +350,7 @@
             background-color: var(--card-bg);
             border-radius: 10px;
             border: 1px solid #C6C6C8;
+            margin-bottom: 15px;
         }
         .checkbox-group input {
             width: 20px;
@@ -293,18 +365,27 @@
             cursor: pointer;
         }
 
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group { flex: 1; }
+
         .form-input, .form-textarea {
             width: 100%;
             padding: 12px;
             border-radius: 10px;
             border: 1px solid #C6C6C8;
             background-color: var(--card-bg);
-            font-size: 17px;
+            font-size: 16px;
             font-family: inherit;
             box-sizing: border-box;
             color: #000;
         }
-        .form-textarea { min-height: 100px; resize: vertical; }
+        .form-textarea { 
+            min-height: 150px; /* Plus grand par défaut pour les infos */
+            resize: vertical; 
+        }
         
         .btn-save {
             background-color: var(--primary);
@@ -317,6 +398,7 @@
             font-weight: 600;
             cursor: pointer;
             margin-top: 20px;
+            margin-bottom: 40px;
         }
 
         #file-input { display: none; }
@@ -347,7 +429,7 @@
         <button class="fab" onclick="openForm()">+</button>
     </div>
 
-    <!-- VUE DÉTAIL -->
+    <!-- VUE DÉTAIL (RESTRUCTURÉE) -->
     <div id="detail-view" class="full-screen-view">
         <div class="view-header">
             <button class="back-btn" onclick="closeView('detail-view')">← Retour</button>
@@ -355,24 +437,40 @@
         </div>
         
         <div class="view-content">
-            <div class="detail-title" id="d-title">Titre</div>
-            
-            <div class="section-label">Zone Libre</div>
-            <div class="detail-box" id="d-free"></div>
-
-            <div class="section-label">Zone Particulière</div>
-            <div class="detail-box" id="d-specific"></div>
-
-            <div class="section-label">Adresse GPS</div>
-            <div class="detail-box" id="d-query" style="color: var(--primary); font-weight:500;"></div>
-
-            <div class="bottom-actions-wrapper">
-                <div class="actions-container">
-                    <a href="#" target="_blank" class="action-btn btn-waze" id="btn-waze">Waze</a>
-                    <a href="#" target="_blank" class="action-btn btn-maps" id="btn-maps">Maps</a>
-                </div>
-                <button class="btn-delete-small" onclick="deleteCurrentAddress()">Supprimer cette adresse</button>
+            <!-- Titre + Favori -->
+            <div class="detail-header-row">
+                <div class="detail-title" id="d-title">Titre</div>
+                <div class="detail-fav-star" id="d-fav-star" style="display:none;">★</div>
             </div>
+            
+            <!-- Zone Informations (Prioritaire) -->
+            <div class="section-label">Informations</div>
+            <div class="detail-box-info" id="d-info"></div>
+
+            <!-- Adresse GPS -->
+            <div class="section-label">Adresse GPS</div>
+            <div class="detail-box-simple" id="d-query"></div>
+
+            <!-- Boutons Navigation -->
+            <div class="actions-container">
+                <a href="#" target="_blank" class="action-btn btn-waze" id="btn-waze">Waze</a>
+                <a href="#" target="_blank" class="action-btn btn-maps" id="btn-maps">Maps</a>
+            </div>
+
+            <!-- Téléphones -->
+            <div class="section-label">Téléphones</div>
+            <div id="container-phones">
+                <!-- Injecté par JS -->
+            </div>
+
+            <!-- Emails -->
+            <div class="section-label">Emails</div>
+            <div id="container-emails">
+                <!-- Injecté par JS -->
+            </div>
+
+            <!-- Supprimer -->
+            <button class="btn-delete-small" onclick="deleteCurrentAddress()">Supprimer cette adresse</button>
         </div>
     </div>
 
@@ -396,22 +494,36 @@
                 <input type="text" id="f-query" class="form-input" placeholder="Ex: 10 Rue de la Paix">
             </div>
 
-            <!-- Case à cocher Favoris -->
-            <div class="form-group">
-                <div class="checkbox-group">
-                    <input type="checkbox" id="f-fav">
-                    <label for="f-fav">Ajouter aux Favoris ★</label>
+            <div class="checkbox-group">
+                <input type="checkbox" id="f-fav">
+                <label for="f-fav">Ajouter aux Favoris ★</label>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Téléphone 1</label>
+                    <input type="tel" id="f-phone1" class="form-input" placeholder="06...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Téléphone 2</label>
+                    <input type="tel" id="f-phone2" class="form-input" placeholder="01...">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Email 1</label>
+                    <input type="email" id="f-email1" class="form-input" placeholder="nom@exemple.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email 2</label>
+                    <input type="email" id="f-email2" class="form-input" placeholder="pro@exemple.com">
                 </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Zone Libre</label>
-                <textarea id="f-free" class="form-textarea" placeholder="Notes..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Zone Particulière</label>
-                <textarea id="f-specific" class="form-textarea" placeholder="Instructions..."></textarea>
+                <label class="form-label">Informations (Notes importantes)</label>
+                <textarea id="f-info" class="form-textarea" placeholder="Détails, codes, instructions..."></textarea>
             </div>
 
             <button class="btn-save" onclick="saveAddress()">Enregistrer</button>
@@ -423,7 +535,7 @@
     <script>
         let addresses = [];
         let currentId = null;
-        let isSortedByFav = false; // État du tri
+        let isSortedByFav = false;
 
         function init() {
             const stored = localStorage.getItem('myAddresses');
@@ -431,9 +543,28 @@
                 addresses = JSON.parse(stored);
             } else {
                 addresses = [
-                    { id: 1, title: "Bureau (Favori)", freeText: "Réunion 14h", specificZone: "Badge requis", query: "Paris, La Défense", isFav: true },
-                    { id: 2, title: "Client Martin", freeText: "Devis à signer", specificZone: "Code 1234", query: "Lyon Centre", isFav: false },
-                    { id: 3, title: "Maison", freeText: "Acheter du pain", specificZone: "Clé sous le paillasson", query: "Bordeaux Centre", isFav: true }
+                    { 
+                        id: 1, 
+                        title: "Bureau (Favori)", 
+                        phone1: "01 23 45 67 89", 
+                        phone2: "06 12 34 56 78",
+                        email1: "contact@bureau.com", 
+                        email2: "",
+                        info: "Réunion à 14h en salle B.\nBadge obligatoire à l'accueil.\nPrévenir 10min avant.", 
+                        query: "Paris, La Défense", 
+                        isFav: true 
+                    },
+                    { 
+                        id: 2, 
+                        title: "Maison", 
+                        phone1: "06 99 88 77 66", 
+                        phone2: "",
+                        email1: "moi@maison.com", 
+                        email2: "",
+                        info: "Clé sous le paillasson si je suis en retard.\nNe pas sonner après 22h.", 
+                        query: "Bordeaux Centre", 
+                        isFav: false 
+                    }
                 ];
             }
             renderList();
@@ -444,7 +575,6 @@
             renderList();
         }
 
-        // --- TRI ---
         function toggleSort() {
             isSortedByFav = !isSortedByFav;
             const btn = document.getElementById('sort-btn');
@@ -465,18 +595,13 @@
 
         function getSortedAddresses(list) {
             if (!isSortedByFav) return list;
-
             return [...list].sort((a, b) => {
-                // 1. Les favoris d'abord
                 if (a.isFav && !b.isFav) return -1;
                 if (!a.isFav && b.isFav) return 1;
-                
-                // 2. À l'intérieur des groupes, ordre alphabétique par titre
                 return a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' });
             });
         }
 
-        // --- EXPORT / IMPORT ---
         function exportData() {
             const dataStr = JSON.stringify(addresses, null, 2);
             const blob = new Blob([dataStr], { type: "application/json" });
@@ -504,9 +629,17 @@
                     const imported = JSON.parse(e.target.result);
                     if (Array.isArray(imported)) {
                         addresses = imported;
-                        // Migration des anciennes données sans isFav
+                        // Migration des anciens champs
                         addresses.forEach(addr => {
                             if (addr.isFav === undefined) addr.isFav = false;
+                            if (!addr.phone1) addr.phone1 = "";
+                            if (!addr.phone2) addr.phone2 = "";
+                            if (!addr.email1) addr.email1 = "";
+                            if (!addr.email2) addr.email2 = "";
+                            // Migration de freeText vers info si besoin
+                            if (!addr.info && addr.freeText) addr.info = addr.freeText;
+                            delete addr.freeText;
+                            delete addr.specificZone;
                         });
                         saveToLocal();
                         alert("Restauration réussie !");
@@ -521,16 +654,14 @@
             input.value = '';
         }
 
-        // --- NAVIGATION ---
         function renderList(filterText = '') {
             const listContainer = document.getElementById('address-list');
             listContainer.innerHTML = '';
             
             let filtered = addresses.filter(addr => 
-                addr.title.toLowerCase().includes(filterText.toLowerCase())
+                addr.title.toLowerCase().includes(filterText.toLowerCase()) ||
+                (addr.info && addr.info.toLowerCase().includes(filterText.toLowerCase()))
             );
-            
-            // Application du tri
             filtered = getSortedAddresses(filtered);
             
             if (filtered.length === 0) {
@@ -541,20 +672,35 @@
             filtered.forEach(addr => {
                 const item = document.createElement('div');
                 item.className = 'address-item';
-                
                 const favStar = addr.isFav ? '★' : '☆';
                 const favClass = addr.isFav ? 'visible' : '';
                 
+                // Aperçu sur les informations
+                const previewText = addr.info ? addr.info.split('\n')[0] : (addr.phone1 || '');
+
                 item.innerHTML = `
                     <div class="fav-icon ${favClass}">${favStar}</div>
                     <div class="item-content">
                         <div class="address-title">${addr.title}</div>
-                        <div class="address-preview">${addr.freeText || addr.specificZone || ''}</div>
+                        <div class="address-preview">${previewText}</div>
                     </div>
                 `;
                 item.onclick = () => openDetail(addr.id);
                 listContainer.appendChild(item);
             });
+        }
+
+        function createContactRow(type, value, label, actionLabel) {
+            if (!value) return '';
+            const href = type === 'phone' ? `tel:${value}` : `mailto:${value}`;
+            const btnClass = type === 'phone' ? 'btn-call' : 'btn-mail';
+            
+            return `
+                <div class="contact-row">
+                    <div class="contact-text">${label}: <strong>${value}</strong></div>
+                    <a href="${href}" class="contact-action-btn ${btnClass}">${actionLabel}</a>
+                </div>
+            `;
         }
 
         function openDetail(id) {
@@ -563,13 +709,35 @@
             if (!addr) return;
 
             document.getElementById('d-title').textContent = addr.title;
-            document.getElementById('d-free').textContent = addr.freeText || "";
-            document.getElementById('d-specific').textContent = addr.specificZone || "";
+            
+            // Gestion Favori dans le titre
+            const favStar = document.getElementById('d-fav-star');
+            favStar.style.display = addr.isFav ? 'block' : 'none';
+            
+            // Informations (Zone principale)
+            document.getElementById('d-info').textContent = addr.info || "Aucune information.";
+
+            // Adresse
             document.getElementById('d-query').textContent = addr.query;
 
+            // Liens GPS
             const encoded = encodeURIComponent(addr.query);
             document.getElementById('btn-waze').href = `https://waze.com/ul?q=${encoded}`;
             document.getElementById('btn-maps').href = `https://www.google.com/maps/search/?api=1&query=${encoded}`;
+
+            // Téléphones
+            const phonesContainer = document.getElementById('container-phones');
+            let phonesHtml = '';
+            if (addr.phone1) phonesHtml += createContactRow('phone', addr.phone1, 'Tél 1', 'Appeler');
+            if (addr.phone2) phonesHtml += createContactRow('phone', addr.phone2, 'Tél 2', 'Appeler');
+            phonesContainer.innerHTML = phonesHtml || '<div style="color:#8E8E93; font-style:italic; padding:10px;">Aucun téléphone</div>';
+
+            // Emails
+            const emailsContainer = document.getElementById('container-emails');
+            let emailsHtml = '';
+            if (addr.email1) emailsHtml += createContactRow('mail', addr.email1, 'Email 1', 'Envoyer');
+            if (addr.email2) emailsHtml += createContactRow('mail', addr.email2, 'Email 2', 'Envoyer');
+            emailsContainer.innerHTML = emailsHtml || '<div style="color:#8E8E93; font-style:italic; padding:10px;">Aucun email</div>';
 
             const view = document.getElementById('detail-view');
             view.style.display = 'flex';
@@ -584,9 +752,14 @@
             document.getElementById('f-id').value = addr.id;
             document.getElementById('f-title').value = addr.title;
             document.getElementById('f-query').value = addr.query;
-            document.getElementById('f-fav').checked = addr.isFav || false; // Gestion booléen
-            document.getElementById('f-free').value = addr.freeText || '';
-            document.getElementById('f-specific').value = addr.specificZone || '';
+            document.getElementById('f-fav').checked = addr.isFav || false;
+            
+            document.getElementById('f-phone1').value = addr.phone1 || '';
+            document.getElementById('f-phone2').value = addr.phone2 || '';
+            document.getElementById('f-email1').value = addr.email1 || '';
+            document.getElementById('f-email2').value = addr.email2 || '';
+            
+            document.getElementById('f-info').value = addr.info || '';
             
             document.getElementById('form-title-text').textContent = "Modifier l'adresse";
 
@@ -601,8 +774,13 @@
             document.getElementById('f-title').value = '';
             document.getElementById('f-query').value = '';
             document.getElementById('f-fav').checked = false;
-            document.getElementById('f-free').value = '';
-            document.getElementById('f-specific').value = '';
+            
+            document.getElementById('f-phone1').value = '';
+            document.getElementById('f-phone2').value = '';
+            document.getElementById('f-email1').value = '';
+            document.getElementById('f-email2').value = '';
+            
+            document.getElementById('f-info').value = '';
             document.getElementById('form-title-text').textContent = "Nouvelle Adresse";
 
             const formView = document.getElementById('form-view');
@@ -621,31 +799,31 @@
             }
 
             const isFav = document.getElementById('f-fav').checked;
-            const freeText = document.getElementById('f-free').value.trim();
-            const specificZone = document.getElementById('f-specific').value.trim();
+            const phone1 = document.getElementById('f-phone1').value.trim();
+            const phone2 = document.getElementById('f-phone2').value.trim();
+            const email1 = document.getElementById('f-email1').value.trim();
+            const email2 = document.getElementById('f-email2').value.trim();
+            const info = document.getElementById('f-info').value.trim();
+
+            const newData = {
+                title: title,
+                query: query,
+                isFav: isFav,
+                phone1: phone1,
+                phone2: phone2,
+                email1: email1,
+                email2: email2,
+                info: info
+            };
 
             if (idVal) {
                 const idNum = parseInt(idVal);
                 const index = addresses.findIndex(a => a.id === idNum);
                 if (index !== -1) {
-                    addresses[index] = {
-                        id: idNum,
-                        title: title,
-                        query: query,
-                        isFav: isFav,
-                        freeText: freeText,
-                        specificZone: specificZone
-                    };
+                    addresses[index] = { id: idNum, ...newData };
                 }
             } else {
-                addresses.push({
-                    id: Date.now(),
-                    title: title,
-                    query: query,
-                    isFav: isFav,
-                    freeText: freeText,
-                    specificZone: specificZone
-                });
+                addresses.push({ id: Date.now(), ...newData });
             }
 
             saveToLocal();
