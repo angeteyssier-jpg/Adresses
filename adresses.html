@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestion d'Adresses</title>
+    <title>Gestion d'Adresses - Ultime</title>
     <style>
         :root {
             --primary: #007AFF;
@@ -14,10 +14,10 @@
             --card-bg: #FFFFFF;
             --text: #000000;
             --text-sec: #8E8E93;
-            --waze: #33CCFF;
-            --maps: #34A853;
             --phone: #34C759;
             --mail: #007AFF;
+            --sms: #5856D6;
+            --list: #FF9500;
         }
 
         body {
@@ -64,16 +64,19 @@
 
         h1 { font-size: 18px; margin: 0; font-weight: 700; display: inline-block; margin-right: 8px; }
 
-        .cat-select {
-            padding: 6px 10px;
+        .list-global-btn {
+            font-size: 13px;
+            background: none;
+            border: 1px solid var(--list);
+            color: var(--list);
+            padding: 5px 10px;
             border-radius: 8px;
-            border: 1px solid #C6C6C8;
-            background-color: #E3E3E8;
-            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
             font-weight: 600;
-            color: var(--text);
-            outline: none;
-            max-width: 160px;
+            white-space: nowrap;
         }
 
         .cat-manage-btn {
@@ -109,6 +112,23 @@
             font-size: 15px;
             box-sizing: border-box;
             outline: none;
+            margin-bottom: 8px;
+        }
+
+        #cat-filter-container {
+            width: 100%;
+        }
+        #cat-filter {
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #C6C6C8;
+            background-color: #E3E3E8;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            outline: none;
+            box-sizing: border-box;
         }
 
         #address-list {
@@ -206,6 +226,7 @@
         .detail-title { font-size: 24px; font-weight: 700; margin: 0; }
         .detail-fav-star { color: var(--warning); font-size: 24px; line-height: 1; }
         .section-label { font-size: 12px; color: var(--text-sec); text-transform: uppercase; margin-bottom: 5px; margin-top: 15px; font-weight: 700; letter-spacing: 0.5px; flex-shrink: 0; }
+        
         .detail-box-info {
             background-color: var(--card-bg);
             padding: 20px;
@@ -251,8 +272,8 @@
             align-items: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
-        .btn-waze { background-color: var(--waze); }
-        .btn-maps { background-color: var(--maps); }
+        .btn-waze { background-color: #33CCFF; }
+        .btn-maps { background-color: #34A853; }
 
         .contact-row {
             display: flex;
@@ -264,24 +285,38 @@
             margin-bottom: 10px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 8px;
         }
-        .contact-text { font-size: 15px; color: var(--text); flex: 1; margin-right: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+        .contact-text { font-size: 15px; color: var(--text); flex: 1; min-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+        
+        .contact-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
         .contact-action-btn {
-            padding: 12px 20px;
-            border-radius: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
             border: none;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 700;
             color: white;
             cursor: pointer;
             text-decoration: none;
             white-space: nowrap;
             flex-shrink: 0;
-            min-width: 80px;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .btn-call { background-color: var(--phone); }
         .btn-mail { background-color: var(--mail); }
+        .btn-sms { background-color: var(--sms); }
+        .btn-list-add { background-color: var(--list); }
+        .btn-list-add.added { background-color: var(--success); }
+
         .btn-delete-small {
             background: none;
             border: none;
@@ -375,6 +410,80 @@
             cursor: pointer;
         }
 
+        /* --- VUE DIFFUSION --- */
+        .tabs {
+            display: flex;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid #C6C6C8;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-sec);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        
+        .tab-content { display: none; padding: 20px; flex: 1; overflow-y: auto; }
+        .tab-content.active { display: block; }
+
+        .broadcast-action-area {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .btn-broadcast {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .btn-broadcast:disabled { background-color: #ccc; cursor: not-allowed; }
+        .broadcast-count { font-size: 13px; color: var(--text-sec); }
+
+        .broadcast-list-item {
+            background: var(--card-bg);
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .broadcast-item-info { flex: 1; min-width: 0; }
+        .broadcast-item-title { font-weight: 600; font-size: 15px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .broadcast-item-val { font-size: 13px; color: var(--text-sec); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .btn-remove-item {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--danger);
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
         #file-input { display: none; }
         .slide-in { animation: slideIn 0.3s ease-out; }
         @keyframes slideIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -388,17 +497,18 @@
             <div class="header-row-1">
                 <h1>Adresses</h1>
                 <div class="header-controls">
-                    <select id="cat-filter" class="cat-select" onchange="renderList()">
-                        <option value="all">Toutes les cat.</option>
-                    </select>
-                    
+                    <button class="list-global-btn" onclick="openBroadcastManager()">📋 Liste</button>
                     <button class="cat-manage-btn" onclick="openCatManager()">Cat.</button>
-                    
                     <button class="backup-btn" onclick="exportData()" title="Sauvegarder">💾</button>
                     <button class="backup-btn restore" onclick="triggerImport()" title="Restaurer">📂</button>
                 </div>
             </div>
-            <input type="text" id="search-bar" placeholder="Rechercher dans toutes les adresses...">
+            <input type="text" id="search-bar" placeholder="Rechercher dans les adresses...">
+            <div id="cat-filter-container">
+                <select id="cat-filter" class="cat-select" onchange="renderList()">
+                    <option value="all">Toutes les cat.</option>
+                </select>
+            </div>
         </header>
         <div id="address-list"></div>
         <button class="fab" onclick="openForm()">+</button>
@@ -437,7 +547,7 @@
         </div>
     </div>
 
-    <!-- VUE FORMULAIRE ADRESSE -->
+    <!-- VUE FORMULAIRE -->
     <div id="form-view" class="full-screen-view">
         <div class="view-header">
             <button class="back-btn" onclick="closeView('form-view')">Annuler</button>
@@ -446,27 +556,22 @@
         </div>
         <div class="view-content">
             <input type="hidden" id="f-id">
-            
             <div class="form-group">
                 <label class="form-label">Titre</label>
                 <input type="text" id="f-title" class="form-input" placeholder="Ex: Maison">
             </div>
-
             <div class="form-group">
                 <label class="form-label">Catégorie</label>
                 <select id="f-cat" class="form-select"></select>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Adresse GPS</label>
                 <input type="text" id="f-query" class="form-input" placeholder="Ex: 10 Rue de la Paix">
             </div>
-
             <div class="checkbox-group">
                 <input type="checkbox" id="f-fav">
                 <label for="f-fav">Favori ★</label>
             </div>
-
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Tél 1</label>
@@ -477,7 +582,6 @@
                     <input type="tel" id="f-phone2" class="form-input" placeholder="01...">
                 </div>
             </div>
-
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Email 1</label>
@@ -488,12 +592,10 @@
                     <input type="email" id="f-email2" class="form-input" placeholder="pro@exemple.com">
                 </div>
             </div>
-
             <div class="form-group">
                 <label class="form-label">Informations</label>
                 <textarea id="f-info" class="form-textarea" placeholder="Détails, codes, instructions..."></textarea>
             </div>
-
             <button class="btn-save" onclick="saveAddress()">Enregistrer</button>
         </div>
     </div>
@@ -511,6 +613,33 @@
         </div>
     </div>
 
+    <!-- VUE DIFFUSION -->
+    <div id="broadcast-view" class="full-screen-view">
+        <div class="view-header">
+            <button class="back-btn" onclick="closeView('broadcast-view')">← Retour</button>
+            <h2 style="margin:0; font-size:18px;">Liste de Diffusion</h2>
+            <div style="width:50px;"></div>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchBroadcastTab('mail')">✉️ Emails</button>
+            <button class="tab-btn" onclick="switchBroadcastTab('sms')">📱 SMS</button>
+        </div>
+        <div id="tab-mail" class="tab-content active">
+            <div class="broadcast-action-area">
+                <button class="btn-broadcast" id="btn-send-mail" onclick="sendBroadcast('mail')">Envoyer à la liste</button>
+                <div class="broadcast-count" id="count-mail">0 contact sélectionné</div>
+            </div>
+            <div id="list-mail-container"></div>
+        </div>
+        <div id="tab-sms" class="tab-content">
+            <div class="broadcast-action-area">
+                <button class="btn-broadcast" id="btn-send-sms" onclick="sendBroadcast('sms')">Envoyer un SMS</button>
+                <div class="broadcast-count" id="count-sms">0 contact sélectionné</div>
+            </div>
+            <div id="list-sms-container"></div>
+        </div>
+    </div>
+
     <input type="file" id="file-input" accept=".json" onchange="importData(this)">
 
     <script>
@@ -518,6 +647,10 @@
         let categories = [];
         const DEFAULT_CAT_NAME = "Aucune catégorie";
         let currentId = null;
+        
+        // Listes temporaires de diffusion (non sauvegardées)
+        let broadcastListMail = [];
+        let broadcastListSms = [];
 
         function init() {
             const storedAddr = localStorage.getItem('myAddresses');
@@ -538,11 +671,8 @@
             migrateData();
             updateCatSelects();
             
-            // DÉFAUT : Sélectionner "Aucune catégorie" au démarrage
             const defaultCat = categories.find(c => c.name === DEFAULT_CAT_NAME);
-            if (defaultCat) {
-                document.getElementById('cat-filter').value = defaultCat.id;
-            }
+            if (defaultCat) document.getElementById('cat-filter').value = defaultCat.id;
             
             renderList();
         }
@@ -582,26 +712,19 @@
             filterSelect.innerHTML = '<option value="all">Toutes les cat.</option>';
             formSelect.innerHTML = '';
 
-            const sortedCats = [...categories].sort((a, b) => {
-                return a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' });
-            });
+            const sortedCats = [...categories].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
 
             sortedCats.forEach(cat => {
                 const opt1 = document.createElement('option');
-                opt1.value = cat.id;
-                opt1.textContent = cat.name;
+                opt1.value = cat.id; opt1.textContent = cat.name;
                 filterSelect.appendChild(opt1);
-
                 const opt2 = document.createElement('option');
-                opt2.value = cat.id;
-                opt2.textContent = cat.name;
+                opt2.value = cat.id; opt2.textContent = cat.name;
                 formSelect.appendChild(opt2);
             });
 
-            // Restaurer la sélection si elle existe toujours, sinon rester sur le défaut
-            if (currentFilter && categories.find(c => c.id == currentFilter)) {
-                filterSelect.value = currentFilter;
-            } else {
+            if (currentFilter && categories.find(c => c.id == currentFilter)) filterSelect.value = currentFilter;
+            else {
                 const defaultCat = categories.find(c => c.name === DEFAULT_CAT_NAME);
                 if (defaultCat) filterSelect.value = defaultCat.id;
             }
@@ -611,57 +734,40 @@
             const listContainer = document.getElementById('address-list');
             const filterCat = document.getElementById('cat-filter').value;
             const rawSearchText = document.getElementById('search-bar').value;
-            
-            // Normalisation pour gérer les accents (re trouve Rémi)
             const searchText = rawSearchText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-        
+
             listContainer.innerHTML = '';
-            
             let finalList = [];
-        
-            // --- CAS 1 : RECHERCHE ACTIVE ---
+
             if (searchText !== "") {
-                // On ignore la catégorie. On cherche UNIQUEMENT dans le TITRE.
                 finalList = addresses.filter(addr => {
                     const titleNorm = (addr.title || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                     return titleNorm.includes(searchText);
                 });
-        
-                // Tri alphabétique simple
                 finalList.sort((a, b) => a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' }));
-            } 
-            
-            // --- CAS 2 : RECHERCHE VIDE ---
-            else {
-                // 1. TOUS LES FAVORIS (Le filtre catégorie est ignoré pour les favoris)
+            } else {
                 const favorites = addresses.filter(addr => addr.isFav);
                 favorites.sort((a, b) => a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' }));
-        
-                // 2. LES AUTRES (Respectent le filtre catégorie)
                 const others = addresses.filter(addr => {
-                    if (addr.isFav) return false; // Déjà dans le groupe 1
+                    if (addr.isFav) return false;
                     if (filterCat === 'all') return true;
                     return addr.categoryId == filterCat;
                 });
                 others.sort((a, b) => a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' }));
-        
-                // Fusion : Favoris toujours en premier, puis les autres filtrés
                 finalList = [...favorites, ...others];
             }
-        
-            // --- AFFICHAGE ---
+
             if (finalList.length === 0) {
                 listContainer.innerHTML = '<div style="text-align:center; color:#8E8E93; margin-top:20px; font-size:14px;">Aucune adresse trouvée</div>';
                 return;
             }
-        
+
             finalList.forEach(addr => {
                 const item = document.createElement('div');
                 item.className = 'address-item';
-                
                 const favStar = addr.isFav ? '★' : '☆';
                 const favClass = addr.isFav ? 'visible' : '';
-                
+                // CORRECTION ICI : Pas de $ superflu
                 item.innerHTML = `
                     <div class="fav-icon ${favClass}">${favStar}</div>
                     <div class="item-content">
@@ -672,15 +778,70 @@
                 listContainer.appendChild(item);
             });
         }
-        
 
-        function createContactRow(type, value, label, actionLabel) {
-            if (!value) return '';
-            const href = type === 'phone' ? `tel:${value}` : `mailto:${value}`;
-            const btnClass = type === 'phone' ? 'btn-call' : 'btn-mail';
-            return `<div class="contact-row"><div class="contact-text">${label}: ${value}</div><a href="${href}" class="contact-action-btn ${btnClass}">${actionLabel}</a></div>`;
+        // Fonction de création des lignes de contact (Tél/Mail) avec boutons
+        function createContactRow(type, value, label, addrId, fieldKey) {
+            const isMail = type === 'mail';
+            // CORRECTION ICI : Pas de $ superflu dans les URLs
+            const href = isMail ? `mailto:${value}` : `tel:${value}`;
+            const btnClass = isMail ? 'btn-mail' : 'btn-call';
+            const actionLabel = isMail ? 'Mail' : 'Tel';
+            
+            const inList = isMail 
+                ? broadcastListMail.some(item => item.addrId === addrId && item.value === value)
+                : broadcastListSms.some(item => item.addrId === addrId && item.value === value);
+            
+            const listBtnClass = inList ? 'btn-list-add added' : 'btn-list-add';
+            const listBtnText = inList ? '✓ List' : '+ List';
+
+            let extraBtns = '';
+            if (!isMail) {
+                extraBtns = `<button class="contact-action-btn btn-sms" onclick="window.location.href='sms:${value}'">SMS</button>`;
+            }
+
+            // CORRECTION ICI : Tous les ${variable} sont propres, sans $ devant
+            return `
+            <div class="contact-row">
+                <div class="contact-text">${label}: ${value}</div>
+                <div class="contact-actions">
+                    <a href="${href}" class="contact-action-btn ${btnClass}">${actionLabel}</a>
+                    ${extraBtns}
+                    <button class="contact-action-btn ${listBtnClass}" onclick="toggleBroadcastList('${type}', '${value}', '${label}', ${addrId}, this)">${listBtnText}</button>
+                </div>
+            </div>`;
+        }
+        function toggleBroadcastList(type, value, label, addrId, btnElement) {
+            const addr = addresses.find(a => a.id === addrId);
+            if (!addr) return;
+
+            if (type === 'mail') {
+                const idx = broadcastListMail.findIndex(item => item.addrId === addrId && item.value === value);
+                if (idx === -1) {
+                    broadcastListMail.push({ addrId, title: addr.title, value, label });
+                    btnElement.classList.add('added'); 
+                    btnElement.textContent = '✓ List';
+                } else {
+                    broadcastListMail.splice(idx, 1);
+                    btnElement.classList.remove('added'); 
+                    btnElement.textContent = '+ List';
+                }
+                renderBroadcastList('mail');
+            } else {
+                const idx = broadcastListSms.findIndex(item => item.addrId === addrId && item.value === value);
+                if (idx === -1) {
+                    broadcastListSms.push({ addrId, title: addr.title, value, label });
+                    btnElement.classList.add('added'); 
+                    btnElement.textContent = '✓ List';
+                } else {
+                    broadcastListSms.splice(idx, 1);
+                    btnElement.classList.remove('added'); 
+                    btnElement.textContent = '+ List';
+                }
+                renderBroadcastList('sms');
+            }
         }
 
+        // Fonction CORRIGÉE pour l'affichage du détail
         function openDetail(id) {
             currentId = id;
             const addr = addresses.find(a => a.id === id);
@@ -695,17 +856,39 @@
             document.getElementById('btn-waze').href = `https://waze.com/ul?q=${encoded}`;
             document.getElementById('btn-maps').href = `https://www.google.com/maps/search/?api=1&query=${encoded}`;
 
+            // --- TÉLÉPHONES ---
             const phonesContainer = document.getElementById('container-phones');
-            let phonesHtml = '';
-            if (addr.phone1) phonesHtml += createContactRow('phone', addr.phone1, 'Tél 1', 'Appeler');
-            if (addr.phone2) phonesHtml += createContactRow('phone', addr.phone2, 'Tél 2', 'Appeler');
-            phonesContainer.innerHTML = phonesHtml || '<div style="color:#8E8E93; font-style:italic; padding:10px; font-size:14px;">Aucun téléphone</div>';
+            phonesContainer.innerHTML = ''; // Vider avant de remplir
+            let hasPhone = false;
+            
+            if (addr.phone1 && addr.phone1.trim() !== "") {
+                hasPhone = true;
+                phonesContainer.innerHTML += createContactRow('phone', addr.phone1.trim(), 'Tél 1', addr.id, 'phone1');
+            }
+            if (addr.phone2 && addr.phone2.trim() !== "") {
+                hasPhone = true;
+                phonesContainer.innerHTML += createContactRow('phone', addr.phone2.trim(), 'Tél 2', addr.id, 'phone2');
+            }
+            if (!hasPhone) {
+                phonesContainer.innerHTML = '<div style="color:#8E8E93; font-style:italic; padding:10px; font-size:14px;">Aucun téléphone</div>';
+            }
 
+            // --- EMAILS ---
             const emailsContainer = document.getElementById('container-emails');
-            let emailsHtml = '';
-            if (addr.email1) emailsHtml += createContactRow('mail', addr.email1, 'Email 1', 'Mail');
-            if (addr.email2) emailsHtml += createContactRow('mail', addr.email2, 'Email 2', 'Mail');
-            emailsContainer.innerHTML = emailsHtml || '<div style="color:#8E8E93; font-style:italic; padding:10px; font-size:14px;">Aucun email</div>';
+            emailsContainer.innerHTML = ''; // Vider avant de remplir
+            let hasEmail = false;
+
+            if (addr.email1 && addr.email1.trim() !== "") {
+                hasEmail = true;
+                emailsContainer.innerHTML += createContactRow('mail', addr.email1.trim(), 'Email 1', addr.id, 'email1');
+            }
+            if (addr.email2 && addr.email2.trim() !== "") {
+                hasEmail = true;
+                emailsContainer.innerHTML += createContactRow('mail', addr.email2.trim(), 'Email 2', addr.id, 'email2');
+            }
+            if (!hasEmail) {
+                emailsContainer.innerHTML = '<div style="color:#8E8E93; font-style:italic; padding:10px; font-size:14px;">Aucun email</div>';
+            }
 
             const view = document.getElementById('detail-view');
             view.style.display = 'flex';
@@ -716,7 +899,6 @@
             if (!currentId) return;
             const addr = addresses.find(a => a.id === currentId);
             if (!addr) return;
-
             document.getElementById('f-id').value = addr.id;
             document.getElementById('f-title').value = addr.title;
             document.getElementById('f-cat').value = addr.categoryId;
@@ -727,7 +909,6 @@
             document.getElementById('f-email1').value = addr.email1 || '';
             document.getElementById('f-email2').value = addr.email2 || '';
             document.getElementById('f-info').value = addr.info || '';
-            
             document.getElementById('form-title-text').textContent = "Modifier";
             const formView = document.getElementById('form-view');
             formView.style.display = 'flex';
@@ -737,7 +918,6 @@
         function openForm() {
             currentId = null;
             const defaultCat = categories.find(c => c.name === DEFAULT_CAT_NAME);
-            
             document.getElementById('f-id').value = '';
             document.getElementById('f-title').value = '';
             document.getElementById('f-cat').value = defaultCat ? defaultCat.id : categories[0].id;
@@ -749,7 +929,6 @@
             document.getElementById('f-email2').value = '';
             document.getElementById('f-info').value = '';
             document.getElementById('form-title-text').textContent = "Nouvelle Adresse";
-            
             const formView = document.getElementById('form-view');
             formView.style.display = 'flex';
             formView.classList.add('slide-in');
@@ -759,7 +938,6 @@
             const idVal = document.getElementById('f-id').value;
             const title = document.getElementById('f-title').value.trim();
             const query = document.getElementById('f-query').value.trim();
-            
             if (!title || !query) { alert("Titre et Adresse obligatoires."); return; }
 
             const newData = {
@@ -784,11 +962,12 @@
 
             saveAll();
             closeView('form-view');
+            if(currentId) openDetail(currentId);
         }
 
         function deleteCurrentAddress() {
             if (!currentId) return;
-            if (confirm("Supprimer ?")) {
+            if (confirm("Supprimer cette adresse ?")) {
                 addresses = addresses.filter(a => a.id !== currentId);
                 saveAll();
                 closeView('detail-view');
@@ -796,7 +975,6 @@
         }
 
         // --- GESTION CATÉGORIES ---
-
         function openCatManager() {
             renderCatList();
             const view = document.getElementById('cat-manager-view');
@@ -807,14 +985,12 @@
         function renderCatList() {
             const container = document.getElementById('cat-list-container');
             container.innerHTML = '';
-            
             const sortedCats = [...categories].sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }));
             
             sortedCats.forEach(cat => {
                 const isDefault = cat.name === DEFAULT_CAT_NAME;
                 const item = document.createElement('div');
                 item.className = 'cat-list-item';
-                
                 let actionsHtml = '';
                 if (!isDefault) {
                     actionsHtml = `
@@ -826,11 +1002,7 @@
                 } else {
                     actionsHtml = `<span style="font-size:12px; color:#8E8E93; font-style:italic;">Système</span>`;
                 }
-
-                item.innerHTML = `
-                    <div class="cat-name">${cat.name}</div>
-                    ${actionsHtml}
-                `;
+                item.innerHTML = `<div class="cat-name">${cat.name}</div>${actionsHtml}`;
                 container.appendChild(item);
             });
         }
@@ -878,9 +1050,93 @@
             }
         }
 
+        // --- GESTION DE LA DIFFUSION (MAIL / SMS) ---
+        function openBroadcastManager() {
+            renderBroadcastList('mail');
+            renderBroadcastList('sms');
+            const view = document.getElementById('broadcast-view');
+            view.style.display = 'flex';
+            view.classList.add('slide-in');
+        }
+
+        function switchBroadcastTab(type) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelector(`.tab-btn[onclick="switchBroadcastTab('${type}')"]`).classList.add('active');
+            document.getElementById(`tab-${type}`).classList.add('active');
+        }
+
+        function renderBroadcastList(type) {
+            const container = document.getElementById(`list-${type}-container`);
+            const countLabel = document.getElementById(`count-${type}`);
+            const list = type === 'mail' ? broadcastListMail : broadcastListSms;
+
+            container.innerHTML = '';
+            countLabel.textContent = `${list.length} contact${list.length !== 1 ? 's' : ''} sélectionné${list.length !== 1 ? 's' : ''}`;
+
+            if (list.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color:#8E8E93; margin-top:40px; font-size:14px;">
+                    La liste est vide.<br>Allez dans une fiche adresse et cliquez sur le bouton <b>"List"</b> à côté des contacts.
+                </div>`;
+                document.getElementById(`btn-send-${type}`).disabled = true;
+                return;
+            }
+
+            document.getElementById(`btn-send-${type}`).disabled = false;
+
+            list.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'broadcast-list-item';
+                div.innerHTML = `
+                    <div class="broadcast-item-info">
+                        <div class="broadcast-item-title">${item.title}</div>
+                        <div class="broadcast-item-val">${item.label}: ${item.value}</div>
+                    </div>
+                    <button class="btn-remove-item" onclick="removeFromBroadcast('${type}', ${index})">Supprimer</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function removeFromBroadcast(type, index) {
+            if (type === 'mail') {
+                const removed = broadcastListMail.splice(index, 1)[0];
+                if (currentId === removed.addrId) openDetail(currentId);
+            } else {
+                const removed = broadcastListSms.splice(index, 1)[0];
+                if (currentId === removed.addrId) openDetail(currentId);
+            }
+            renderBroadcastList(type);
+        }
+
+        function sendBroadcast(type) {
+            const list = type === 'mail' ? broadcastListMail : broadcastListSms;
+            if (list.length === 0) return;
+
+            const values = list.map(item => item.value);
+            
+            if (type === 'mail') {
+                const subject = encodeURIComponent("Objet de votre message");
+                const body = encodeURIComponent("\n\n\n---\nEnvoyé via Gestion d'Adresses");
+                const recipients = values.map(encodeURIComponent).join(',');
+                window.location.href = `mailto:?bcc=${recipients}&subject=${subject}&body=${body}`;
+                alert(`Votre application mail va s'ouvrir avec ${values.length} destinataires en copie cachée (BCC).`);
+            } else {
+                const recipients = values.join(',');
+                const body = encodeURIComponent("Votre message ici");
+                window.location.href = `sms:${recipients}?body=${body}`;
+                alert(`Attention : Selon votre téléphone, l'envoi groupé de SMS peut ne pas fonctionner nativement.`);
+            }
+        }
+
         // --- EXPORT / IMPORT ---
         function exportData() {
-            const data = { addresses: addresses, categories: categories, version: 2 };
+            const data = { 
+                app: "MesAdresses", 
+                version: 2, 
+                addresses: addresses, 
+                categories: categories 
+            };
             const dataStr = JSON.stringify(data, null, 2);
             const blob = new Blob([dataStr], { type: "application/json" });
             const url = URL.createObjectURL(blob);
@@ -894,7 +1150,7 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            alert("Sauvegarde : " + a.download);
+            alert("Sauvegarde effectuée : " + a.download);
         }
 
         function triggerImport() {
@@ -904,33 +1160,43 @@
         function importData(input) {
             const file = input.files[0];
             if (!file) return;
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    if (data.version === 2 && Array.isArray(data.addresses) && Array.isArray(data.categories)) {
+                    
+                    // Correction : Accepte les versions 1, 2 ou absence de version
+                    const hasAddresses = Array.isArray(data.addresses);
+                    const hasCategories = Array.isArray(data.categories);
+                    const isValidVersion = !data.version || data.version === 1 || data.version === 2;
+
+                    if (hasAddresses && hasCategories && isValidVersion) {
                         addresses = data.addresses;
                         categories = data.categories;
+                        
+                        if (!categories.find(c => c.name === DEFAULT_CAT_NAME)) {
+                            categories.unshift({ id: Date.now(), name: DEFAULT_CAT_NAME });
+                        }
+
                         migrateData();
                         saveAll();
-                        alert("Restauration réussie !");
-                        closeView('detail-view'); closeView('form-view'); closeView('cat-manager-view');
-                    } else if (Array.isArray(data)) {
-                        addresses = data;
-                        if (!categories.length) categories = [{ id: 1, name: DEFAULT_CAT_NAME }];
-                        migrateData();
-                        saveAll();
-                        alert("Restauration (ancien format) réussie !");
-                        closeView('detail-view'); closeView('form-view'); closeView('cat-manager-view');
+                        alert("Restauration réussie !\n" + categories.length + " catégories et " + addresses.length + " adresses importées.");
+                        
+                        closeView('detail-view'); 
+                        closeView('form-view'); 
+                        closeView('cat-manager-view');
+                        closeView('broadcast-view');
                     } else {
-                        alert("Format invalide.");
+                        alert("Format invalide. Assurez-vous que le fichier provient de l'application Adresses.");
                     }
                 } catch (err) {
-                    alert("Erreur de lecture.");
+                    console.error(err);
+                    alert("Erreur de lecture du fichier JSON.");
                 }
+                input.value = '';
             };
             reader.readAsText(file);
-            input.value = '';
         }
 
         function closeView(viewId) {
